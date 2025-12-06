@@ -15,8 +15,6 @@ import { setCookie, getCookie, deleteCookie } from "cookies-next";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
 
-
-
 export default function Home() {
   const router = useRouter();
   const t = useTranslations("home");
@@ -59,7 +57,7 @@ export default function Home() {
         });
         toast.success(`${tToasts("ok")}: ${tToasts("msj.1")}`);
 
-        router.push("/dashboard");
+        router.push("/dashboard/orders/work-orders");
       } else {
         toast.error(`${tToasts("error")}: ${tToasts("msj.2")}`);
       }
