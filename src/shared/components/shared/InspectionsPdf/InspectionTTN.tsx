@@ -1023,72 +1023,75 @@ const InspectionTTN: React.FC<PropsPDF> = ({
                         <th></th>
                       </tr>
                     </thead>
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(434)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(434)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="7"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(435)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(435)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="8"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(436)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(436)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="9"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(437)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(437)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="10"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(438)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(438)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="11"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(439)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(439)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="12"
-                    />
+                    {/* ✅ tbody añadido aquí */}
+                    <tbody>
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(434)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(434)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="7"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(435)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(435)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="8"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(436)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(436)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="9"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(437)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(437)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="10"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(438)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(438)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="11"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(439)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(439)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="12"
+                      />
+                    </tbody>
                   </table>
                 </div>
                 <div className="w-full flex flex-col">
@@ -1108,72 +1111,75 @@ const InspectionTTN: React.FC<PropsPDF> = ({
                         <th></th>
                       </tr>
                     </thead>
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(440)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(440)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="13"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(441)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(441)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="14"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(442)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(442)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="15"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(443)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(443)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="16"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(444)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(444)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="17"
-                    />
-                    <BoxCardInput
-                      check1={
-                        markCheck(matchById(445)?.detail?.finalResponse ?? "")
-                          .ok
-                      }
-                      check2={
-                        markCheck(matchById(445)?.detail?.finalResponse ?? "")
-                          .fail
-                      }
-                      label="18"
-                    />
+                    {/* ✅ tbody añadido aquí también */}
+                    <tbody>
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(440)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(440)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="13"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(441)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(441)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="14"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(442)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(442)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="15"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(443)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(443)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="16"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(444)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(444)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="17"
+                      />
+                      <BoxCardInput
+                        check1={
+                          markCheck(matchById(445)?.detail?.finalResponse ?? "")
+                            .ok
+                        }
+                        check2={
+                          markCheck(matchById(445)?.detail?.finalResponse ?? "")
+                            .fail
+                        }
+                        label="18"
+                      />
+                    </tbody>
                   </table>
                 </div>
                 <div className=" w-full flex items-center justify-center">

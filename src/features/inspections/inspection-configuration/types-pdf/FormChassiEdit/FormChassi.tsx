@@ -11,6 +11,11 @@ import {
   ExportedAnswer,
   ExportedQuestion,
 } from "@/shared/types/inspection/ITypes";
+import {
+  TypeQuestion,
+  TypeQuestionLabel,
+} from "@/features/orders/models/workOrder.types";
+import { IoIosInformationCircleOutline } from "react-icons/io";
 
 const STATUS_ACTIVE = 0 as const;
 const STATUS_DELETED = 1 as const;
@@ -132,6 +137,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
   onQuestionsExport,
   initialQuestions,
 }) => {
+  console.log("initialQuestions", initialQuestions);
   const [openModal, setOpenModal] = useState(false);
   const [questions, setQuestions] = useState<LocalQuestion[]>([]);
   const [editingLocalId, setEditingLocalId] = useState<string | null>(null);
@@ -330,6 +336,11 @@ const FormChassi: React.FC<FormChassiProps> = ({
     onQuestionsExport(cleaned);
   }, [questions, onQuestionsExport]);
 
+  const getTypeQuestionLabel = (type?: number): string => {
+    if (type === null || type === undefined) return "";
+    return TypeQuestionLabel[type as TypeQuestion] ?? String(type);
+  };
+
   useEffect(() => {
     const copy = JSON.parse(
       JSON.stringify(initialQuestions || [])
@@ -393,9 +404,11 @@ const FormChassi: React.FC<FormChassiProps> = ({
                       </div>
                     </td>
                     <td className="text-center">
-                      <span className="text-sm font-medium">
-                        {q.typeQuestion}
-                      </span>
+                      <label className="rounded-full text-sm bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex">
+                        {" "}
+                        <IoIosInformationCircleOutline className="size-6" />
+                        {getTypeQuestionLabel(q.typeQuestion)}
+                      </label>
                     </td>
                     <td className="text-center">
                       <span className="text-sm font-medium">
