@@ -4,16 +4,23 @@ import FormGroup from "@/shared/components/shared/FormGroup";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
 
-import { setCookie, getCookie, deleteCookie } from "cookies-next";
+import { setCookie } from "cookies-next";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
+
+const STATUS_QB_WAITING = "waiting" as const;
+const STATUS_QB_IDLE = "idle" as const;
+const STATUS_QB_ERROR = "error" as const;
+
+const MAX_QB_ATTEMPTS = 20;
+const QB_POLL_INTERVAL_MS = 3000;
 
 export default function Home() {
   const router = useRouter();
@@ -31,6 +38,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // --- Estado para QuickBooks ---
+  const [qbStatus, setQbStatus] = useState<
+    typeof STATUS_QB_IDLE | typeof STATUS_QB_WAITING | typeof STATUS_QB_ERROR
+  >(STATUS_QB_IDLE);
+  const [qbErrorMessage, setQbErrorMessage] = useState<string | null>(null);
+  const [qbPolling, setQbPolling] = useState(false);
+  const [qbLastUrl, setQbLastUrl] = useState<string | null>(null); // para mostrar link fallback
+
   const {
     register,
     handleSubmit,
@@ -39,6 +54,121 @@ export default function Home() {
     resolver: zodResolver(loginSchema),
   });
 
+  /**
+   * Flujo QuickBooks:
+   * 1) Comprobar si YA hay access-token (usuario ya vinculado).
+   * 2) Si no hay, llamar a /QuickBooks/connect, abrir pestaña y empezar polling.
+   */
+  const ensureQuickBooksConnected = async () => {
+    try {
+      setQbStatus(STATUS_QB_IDLE);
+      setQbErrorMessage(null);
+
+      // 1) Verificar si ya existe access-token
+      const tokenRes = await axiosInstance.get("/QuickBooks/access-token");
+      const existingToken = tokenRes.data?.access_token as
+        | string
+        | null
+        | undefined;
+      debugger;
+      if (existingToken && existingToken.trim() !== "") {
+        // Ya está todo ok, no hace falta abrir nada
+        toast.success("QuickBooks ya estaba conectado.");
+        router.push("/dashboard/orders/work-orders");
+        return;
+      }
+
+      // 2) No hay token -> iniciar flujo completo
+      const res = await axiosInstance.get("/QuickBooks/connect");
+      const url = res.data?.url as string | undefined;
+
+      if (!url) {
+        toast.error("No se pudo obtener la URL de QuickBooks.");
+        setQbStatus(STATUS_QB_ERROR);
+        setQbErrorMessage("No se pudo obtener la URL de QuickBooks.");
+        return;
+      }
+
+      setQbLastUrl(url);
+
+      // Abrimos en una nueva pestaña
+      const qbWindow = window.open(url, "_blank", "noopener,noreferrer");
+
+      // Algunos navegadores (especialmente mobile) pueden devolver null
+      // incluso si abrieron la pestaña. Por eso no marcamos error aquí.
+      if (!qbWindow) {
+        // Solo mostramos un aviso suave, sin error
+        setQbErrorMessage(
+          "Si la pestaña de QuickBooks no se abrió, haz clic en el enlace de abajo para abrirla manualmente."
+        );
+      }
+
+      // Mostramos mensaje de espera y arrancamos el polling
+      setQbStatus(STATUS_QB_WAITING);
+      setQbPolling(true);
+    } catch (error) {
+      console.error("QuickBooks connect/access-token error:", error);
+      toast.error("Error al conectar/verificar QuickBooks.");
+      setQbStatus(STATUS_QB_ERROR);
+      setQbErrorMessage("Error al conectar o verificar QuickBooks.");
+    }
+  };
+
+  /**
+   * Polling cada 3 segundos a /QuickBooks/access-token
+   */
+  useEffect(() => {
+    if (!qbPolling) return;
+
+    let attempts = 0;
+
+    const intervalId = window.setInterval(async () => {
+      attempts += 1;
+
+      try {
+        const res = await axiosInstance.get("/QuickBooks/access-token");
+        const accessToken = res.data?.access_token as string | null | undefined;
+
+        if (accessToken && accessToken.trim() !== "") {
+          // ✅ Token obtenido
+          window.clearInterval(intervalId);
+          setQbPolling(false);
+          setQbStatus(STATUS_QB_IDLE);
+          setQbErrorMessage(null);
+
+          toast.success("QuickBooks conectado correctamente.");
+          router.push("/dashboard/orders/work-orders");
+          return;
+        }
+
+        if (attempts >= MAX_QB_ATTEMPTS) {
+          // ❌ No se obtuvo token después de X intentos
+          window.clearInterval(intervalId);
+          setQbPolling(false);
+          setQbStatus(STATUS_QB_ERROR);
+          setQbErrorMessage(
+            "Inicio de sesión fallido por token. Vuelve a intentar la conexión con QuickBooks."
+          );
+          toast.error("Inicio de sesión fallido por token.");
+        }
+      } catch (error) {
+        console.error("QuickBooks access-token error:", error);
+        window.clearInterval(intervalId);
+        setQbPolling(false);
+        setQbStatus(STATUS_QB_ERROR);
+        setQbErrorMessage("Error al verificar QuickBooks.");
+        toast.error("Error al verificar QuickBooks.");
+      }
+    }, QB_POLL_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [qbPolling, router]);
+
+  /**
+   * Login normal + flujo QuickBooks
+   */
   const onSubmit = async (data: LoginData) => {
     setLoading(true);
     setErrorMessage("");
@@ -55,9 +185,11 @@ export default function Home() {
           token: res.data.token,
           user: res.data.user,
         });
+
         toast.success(`${tToasts("ok")}: ${tToasts("msj.1")}`);
 
-        router.push("/dashboard/orders/work-orders");
+        // 🚀 Asegurar conexión con QuickBooks (pre-check + posible ventana nueva)
+        await ensureQuickBooksConnected();
       } else {
         toast.error(`${tToasts("error")}: ${tToasts("msj.2")}`);
       }
@@ -76,7 +208,7 @@ export default function Home() {
           `${tToasts("error")}: ${backendErrors[0].value?.join(", ")}`
         );
       } else {
-        toast.error(`${tToasts("error")}: ${err})}`);
+        toast.error(`${tToasts("error")}: ${String(err)}`);
       }
     } finally {
       setLoading(false);
@@ -93,6 +225,7 @@ export default function Home() {
             <LanguageSwitcher design="header-dashboard" />
           </div>
         </div>
+
         <div className="flex flex-1 p-[15px] md:p-0 items-center justify-center w-full max-w-[500px] md:max-w-[500px]">
           <div className="container flex flex-col gap-4 !p-5 md:p-0 bg-transparent rounded-md md:bg-transparent max-w-full">
             <div>
@@ -106,6 +239,34 @@ export default function Home() {
 
             {errorMessage && (
               <div className="text-red-500 text-sm">{errorMessage}</div>
+            )}
+
+            {/* Mensaje de estado QuickBooks */}
+            {qbStatus === STATUS_QB_WAITING && (
+              <div className="alert alert-info text-sm flex flex-col gap-1">
+                <span>
+                  Esperando confirmación del login de QuickBooks... <br />
+                  Por favor completa el inicio de sesión en la pestaña que se
+                  abrió.
+                </span>
+                {qbLastUrl && (
+                  <a
+                    href={qbLastUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link link-hover font-medium"
+                  >
+                    Si no ves la pestaña, haz clic aquí para abrir QuickBooks
+                    manualmente
+                  </a>
+                )}
+              </div>
+            )}
+
+            {qbStatus === STATUS_QB_ERROR && qbErrorMessage && (
+              <div className="alert alert-warning text-sm">
+                <span>{qbErrorMessage}</span>
+              </div>
             )}
 
             <form

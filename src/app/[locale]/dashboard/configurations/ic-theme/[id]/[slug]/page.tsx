@@ -79,7 +79,7 @@ const Page = () => {
     const normalizedDomain = DOMAIN.endsWith("/") ? DOMAIN : `${DOMAIN}/`;
     return `${normalizedDomain}${path}`;
   }, [match]);
-
+  console.log("pdfUrl:", pdfUrl);
   return (
     <div className="gap-4 flex flex-col min-h-full">
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
@@ -97,7 +97,9 @@ const Page = () => {
       <div className="boddy-app overflow-y-auto">
         <div className="container mt-0 max-w-full">
           {loading && (
-            <div className="p-6 text-sm opacity-70">{t("loading_template")}</div>
+            <div className="p-6 text-sm opacity-70">
+              {t("loading_template")}
+            </div>
           )}
 
           {!loading && error && (
