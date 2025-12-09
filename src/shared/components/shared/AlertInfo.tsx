@@ -14,7 +14,7 @@ const AlertInfo: React.FC<AlertInfoProps> = ({
   return (
     <div
       role="alert"
-      className={`alert alert-${variant} alert-soft mb-5 text-lg ${className}`}
+      className={`alert alert-${variant} alert-soft mb-5 text-lg ${className} !hidden`}
     >
       <span>{children}</span>
     </div>
