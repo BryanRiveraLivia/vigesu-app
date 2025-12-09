@@ -5,12 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import Loading from "@/shared/components/shared/Loading";
-import { FaRegEdit, FaRegEye } from "react-icons/fa";
-import { FiPrinter, FiTrash2 } from "react-icons/fi";
+import { FaRegEye } from "react-icons/fa";
+import { FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
 import { IInspectionItem } from "./models/inspection.types";
-import { formatDate, toISOStringWithTimeSmart } from "@/shared/utils/utils";
-import { GiAutoRepair } from "react-icons/gi";
+import { formatDate } from "@/shared/utils/utils";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import {
   TypeInspectionOrders,
@@ -20,49 +19,41 @@ import clsx from "clsx";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { useTranslations } from "next-intl";
 
-const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
+interface TableListProps {
+  objFilter: { name: string };
+}
+
+const TableList = ({ objFilter }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const t = useTranslations("inspections");
+
   const router = useRouter();
   const pathname = usePathname();
 
   const [allData, setAllData] = useState<IInspectionItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [loading, setLoading] = useState(false);
 
-  const [syncStatus, setSyncStatus] = useState<{
-    [key: number]: "idle" | "loading" | "success";
-  }>({});
+  const [syncStatus, setSyncStatus] = useState<
+    Record<number, "idle" | "loading" | "success">
+  >({});
 
-  const totalPages = Math.ceil(totalCount / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const { items, totalCount } = await getInspections({
-        PageNumber: currentPage,
-        PageSize: rowsPerPage,
-        Name: objFilter.name,
-      });
-
-      setAllData(items);
-      setTotalCount(totalCount);
-    } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ==========================
+  // 🔹 HELPERS
+  // ==========================
   const getBadgeClass = (
     status: TypeInspectionOrders | null | undefined
   ): string => {
     switch (status) {
       case TypeInspectionOrders.Create:
       case TypeInspectionOrders.SyncQuickbook:
-        return "badge badge-dash  badge-success";
+        return "badge badge-dash badge-success";
       case TypeInspectionOrders.PreAccepted:
       case TypeInspectionOrders.Accepted:
         return "badge badge-dash badge-warning";
@@ -73,6 +64,31 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     }
   };
 
+  // ==========================
+  // 🔹 FETCH DATA (PAGINATION)
+  // ==========================
+  const fetchData = async (page = 1) => {
+    setLoading(true);
+    try {
+      const { items, totalCount: total } = await getInspections({
+        PageNumber: page,
+        PageSize: rowsPerPage,
+        Name: objFilter.name,
+      });
+
+      setAllData(items ?? []);
+      setTotalCount(total ?? 0);
+    } catch (error) {
+      console.error(error);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================
+  // 🔹 QUICKBOOKS SYNC
+  // ==========================
   const sendWorkOrderPdfToQuickBooks = async (
     quickBookEstimateId: string,
     workOrderId: number
@@ -121,57 +137,50 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     );
   };
 
-  // Flujo principal actualizado
   const handleSyncWorkOrder = async (
     inspectionId: number,
     syncOnlyEstimate = false
   ) => {
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
     try {
-      // 1) Crear WorkOrder desde la inspección (SIN quickbooks id)
+      // 1) Crear WorkOrder desde la inspección
       const { data: workOrderId } = await axiosInstance.post<number>(
         `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
         { inspectionId }
       );
-      if (typeof workOrderId !== "number")
+      if (typeof workOrderId !== "number") {
         throw new Error("No se obtuvo un workOrderId válido.");
+      }
 
-      // 2) Crear Estimate en QuickBooks desde el WorkOrder (DEVUELVE STRING)
+      // 2) Crear Estimate en QuickBooks
       const { data: quickBookEstimateId } = await axiosInstance.put<string>(
         "/QuickBooks/CreateEstimateFromWorkOrder",
         { workOrderId }
       );
-      if (!quickBookEstimateId)
-        throw new Error(
-          "No se obtuvo un quickBookEstimateId válido (WorkOrder)."
-        );
+      if (!quickBookEstimateId) {
+        throw new Error("No se obtuvo un quickBookEstimateId válido.");
+      }
 
-      // 3) Adjuntar PDF del WorkOrder (si no es 'solo estimate')
+      // 3) Adjuntar PDF WorkOrder
       if (!syncOnlyEstimate) {
         await sendWorkOrderPdfToQuickBooks(quickBookEstimateId, workOrderId);
       }
 
-      // 4) Actualizar la inspección con el QuickBooks Estimate Id (NUEVO PARÁMETRO)
-      console.log("Payload CreateEstimateFromInspection =>", {
-        inspectionId: Number(inspectionId),
-        quickBookEstimateId: String(quickBookEstimateId),
-      });
-
+      // 4) Actualizar inspección con QuickBooks Estimate Id
       await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromInspection",
         {
-          inspectionId, // number
-          quickBookEstimateId: String(quickBookEstimateId), // string
+          inspectionId,
+          quickBookEstimateId: String(quickBookEstimateId),
         },
         { headers: { "Content-Type": "application/json" } }
       );
 
-      // 5) Adjuntar PDF de la Inspección (si no es 'solo estimate')
+      // 5) Adjuntar PDF Inspección
       if (!syncOnlyEstimate) {
         await sendInspectionPdfToQuickBooks(quickBookEstimateId, inspectionId);
       }
 
-      // Éxito visual
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
       setTimeout(async () => {
         setSyncStatus((prev) => {
@@ -179,7 +188,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
           delete updated[inspectionId];
           return updated;
         });
-        await fetchData();
+        await fetchData(currentPage);
         toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 800);
     } catch (error) {
@@ -189,10 +198,9 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
     }
   };
 
-  const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
+  // ==========================
+  // 🔹 DELETE
+  // ==========================
   const deleteTypeInspection = async (inspectionId: number) => {
     try {
       const payload = {
@@ -206,20 +214,33 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.23")}`);
-      fetchData();
+      fetchData(currentPage);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.24")}`);
       console.error(error);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.24")}`);
     }
   };
 
+  // ==========================
+  // 🔹 EFFECTS
+  // ==========================
   useEffect(() => {
-    fetchData();
+    fetchData(currentPage);
   }, [objFilter, currentPage, rowsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [objFilter]);
+  }, [objFilter, rowsPerPage]);
+
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // ==========================
+  // 🔹 VIEW
+  // ==========================
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">
@@ -234,10 +255,11 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
             <th className="w-[20%] truncate"></th>
           </tr>
         </thead>
+
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={5} className="py-10 text-center">
+              <td colSpan={7} className="py-10 text-center">
                 <Loading height="h-[200px]" />
               </td>
             </tr>
@@ -260,7 +282,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
                     {formatDate(item.dateOfInspection)}
                   </td>
 
-                  {/* Sync Quickbook */}
+                  {/* Sync QuickBooks */}
                   <td className="text-center">
                     {status !== TypeInspectionOrders.SyncQuickbook ? (
                       <div className="flex items-center justify-center">
@@ -332,6 +354,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         >
           ««
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(currentPage - 1)}
@@ -339,21 +362,21 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         >
           «
         </button>
-        {totalPages > 0 &&
-          Array.from({ length: totalPages }, (_, idx) => {
-            const page = idx + 1;
-            return (
-              <button
-                key={`page-${page}`}
-                className={`join-item btn ${
-                  currentPage === page ? "btn-active" : ""
-                }`}
-                onClick={() => changePage(page)}
-              >
-                {page}
-              </button>
-            );
-          })}
+
+        {Array.from({ length: totalPages }, (_, idx) => {
+          const page = idx + 1;
+          return (
+            <button
+              key={`page-${page}`}
+              className={`join-item btn ${
+                currentPage === page ? "btn-active" : ""
+              }`}
+              onClick={() => changePage(page)}
+            >
+              {page}
+            </button>
+          );
+        })}
 
         <button
           className="join-item btn"
@@ -362,6 +385,7 @@ const TableList = ({ objFilter }: { objFilter: { name: string } }) => {
         >
           »
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(totalPages)}

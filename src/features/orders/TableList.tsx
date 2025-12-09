@@ -4,18 +4,14 @@ import { useEffect, useState } from "react";
 import { getWorkOrders } from "./api/workOrdersApi";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
-import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
+import { FaRegEdit, FaRegEye } from "react-icons/fa";
 import { TableListProps } from "@/shared/types/order/ITypes";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { FaRegEye } from "react-icons/fa";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { IoSync } from "react-icons/io5";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Loading from "@/shared/components/shared/Loading";
-import html2canvas from "html2canvas";
 import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
 import { useTranslations } from "next-intl";
 
@@ -23,18 +19,25 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const tGeneral = useTranslations("general");
   const t = useTranslations("workorders");
+
   const router = useRouter();
   const pathname = usePathname();
-  const [syncStatus, setSyncStatus] = useState<{
-    [key: number]: "idle" | "loading" | "success";
-  }>({});
+
+  const [syncStatus, setSyncStatus] = useState<
+    Record<number, "idle" | "loading" | "success">
+  >({});
 
   const [allData, setAllData] = useState<WorkOrder[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [loading, setLoading] = useState(true);
 
+  // ==========================
+  // 🔹 SYNCHRONIZATION LOGIC
+  // ==========================
   const handleSyncWorkOrder = async (
     workOrderId: number,
     syncOnlyEstimate = false
@@ -43,9 +46,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     try {
       const response = await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromWorkOrder",
-        {
-          workOrderId,
-        }
+        { workOrderId }
       );
 
       const quickBookEstimatedId = response.data;
@@ -64,9 +65,8 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         });
 
         await fetchData(currentPage);
-
         toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
-      }, 1000);
+      }, 1200);
     } catch (error) {
       toast.error(`${tToasts("error")}: ${error}`);
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
@@ -79,10 +79,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   ) => {
     try {
       const response = await fetch(`/api/pdf/${workOrderId}`);
-
-      if (!response.ok) {
-        throw new Error("Error al generar el PDF desde el servidor");
-      }
+      if (!response.ok) throw new Error("Error al generar el PDF");
 
       const pdfBlob = await response.blob();
       const file = new File(
@@ -100,34 +97,30 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       await axiosInstance.post(
         "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
     } catch (err) {
-      console.error("Error al enviar el PDF:", err);
+      console.error(err);
       toast.error(`${tToasts("error")}: ${err}`);
     }
   };
 
+  // ==========================
+  // 🔹 FETCH DATA WITH PAGINATION
+  // ==========================
   const fetchData = async (page = 1) => {
     setLoading(true);
     try {
-      const filterToSend = {
+      const filterSend = {
         ...objFilter,
-        workorder: objFilter.workorder
-          ? Number(objFilter.workorder)
-          : undefined,
+        workorder: objFilter.workorder ? String(objFilter.workorder) : "",
       };
 
-      const response = await getWorkOrders(objFilter, page, rowsPerPage);
+      const response = await getWorkOrders(filterSend, page, rowsPerPage);
 
-      setAllData(response.items);
+      setAllData(response.items ?? []);
       setTotalRecords(response.totalCount ?? 0);
     } catch (error) {
       toast.error(`${tToasts("error")}: ${error}`);
@@ -136,87 +129,61 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     }
   };
 
+  // ==========================
+  // 🔹 UPDATE STATUS
+  // ==========================
   const updateWorkOrderState = async (
     workOrderId: number,
     statusWorkOrder: number = WorkOrderStatus.Disabled
   ) => {
-    const payload = {
+    await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
       workOrderId,
       statusWorkOrder,
-    };
+    });
 
-    const response = await axiosInstance.put(
-      `/WorkOrder/UpdateWorkOrderState/${workOrderId}`,
-      payload
-    );
-
-    fetchData();
+    fetchData(currentPage);
   };
 
+  // ==========================
+  // 🔹 EFFECTS
+  // ==========================
   useEffect(() => {
     fetchData(currentPage);
   }, [objFilter, refreshSignal, currentPage, rowsPerPage]);
 
   useEffect(() => {
-    if (refreshSignal) {
-      fetchData();
-    }
-  }, [refreshSignal]);
-
-  const filteredData = allData.filter((item) => {
-    const matchClient = objFilter.client
-      ? item.customerName.toLowerCase().includes(objFilter.client.toLowerCase())
-      : true;
-
-    const matchWorker = objFilter.worker
-      ? item.employeeName.toLowerCase().includes(objFilter.worker.toLowerCase())
-      : true;
-
-    const matchWorkorder = objFilter.workorder
-      ? item.workOrderNumber.toString().includes(objFilter.workorder.toString())
-      : true;
-
-    const matchStatus = objFilter.status
-      ? item.statusWorkOrder.toString() === objFilter.status
-      : true;
-
-    const matchDate = objFilter.creationdate
-      ? item.created.substring(0, 10) ===
-        objFilter.creationdate.toISOString().substring(0, 10)
-      : true;
-
-    return (
-      matchClient && matchWorker && matchWorkorder && matchStatus && matchDate
-    );
-  });
-
-  const totalPages = Math.ceil(totalRecords / rowsPerPage);
-
-  const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
-  useEffect(() => {
     setCurrentPage(1);
   }, [objFilter, rowsPerPage]);
 
+  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage));
+
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // ==========================
+  // 🔹 VIEW
+  // ==========================
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table w-full">
         <thead>
           <tr>
-            <th className="w-[8%]"> {t("home.9")}</th>
-            <th className="w-[18%]"> {t("home.10")}</th>
-            <th className="w-[18%] text-center"> {t("home.11")}</th>
-            <th className="w-[18%] text-center"> {t("home.12")}</th>
-            <th className="w-[18%] text-center"> {t("home.13")}</th>
+            <th className="w-[8%]">{t("home.9")}</th>
+            <th className="w-[18%]">{t("home.10")}</th>
+            <th className="w-[18%] text-center">{t("home.11")}</th>
+            <th className="w-[18%] text-center">{t("home.12")}</th>
+            <th className="w-[18%] text-center">{t("home.13")}</th>
             <th className="w-[20%] text-center"></th>
           </tr>
         </thead>
+
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={6} className="text-center py-10">
+              <td colSpan={6} className="py-10 text-center">
                 <Loading />
               </td>
             </tr>
@@ -229,6 +196,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                 <td>
                   <input type="checkbox" className="checkbox" />
                 </td>
+
                 <td
                   className="truncate"
                   onClick={() =>
@@ -237,6 +205,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                 >
                   {item.customerName}
                 </td>
+
                 <td
                   className="truncate text-center"
                   onClick={() =>
@@ -245,27 +214,30 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                 >
                   {item.employeeName}
                 </td>
+
                 <td className="text-center">
-                  <div className="!hidden badge badge-neutral !h-auto mx-auto whitespace-nowrap">
+                  <div className="badge badge-neutral !hidden">
                     {getWorkOrderStatusLabel(item.statusWorkOrder)}
                   </div>
+
                   {item.statusWorkOrder === 0 && (
-                    <div className="badge badge-dash badge-info mx-auto whitespace-nowrap">
+                    <div className="badge badge-dash badge-info whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
                   {item.statusWorkOrder === 1 && (
-                    <div className="badge badge-dash badge-error mx-auto whitespace-nowrap">
+                    <div className="badge badge-dash badge-error whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
                   {item.statusWorkOrder === 2 && (
-                    <div className="badge badge-dash badge-success mx-auto whitespace-nowrap">
+                    <div className="badge badge-dash badge-success whitespace-nowrap">
                       {getWorkOrderStatusLabel(item.statusWorkOrder)}
                     </div>
                   )}
                 </td>
-                <td className=" text-center">
+
+                <td className="text-center">
                   {item.statusWorkOrder !== 2 ? (
                     <div className="flex items-center justify-center">
                       {syncStatus[item.workOrderId] === "loading" ? (
@@ -281,13 +253,12 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                       )}
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center">
-                      <IoMdCheckmark className="text-green-500 text-xl text-center" />
-                    </div>
+                    <IoMdCheckmark className="text-green-500 text-xl mx-auto" />
                   )}
                 </td>
+
                 <td className="text-end">
-                  <div className="flex w-full flex-row gap-2 items-center justify-end">
+                  <div className="flex flex-row justify-end gap-2">
                     {item.statusWorkOrder === 0 ? (
                       <ActionButton
                         icon={
@@ -309,6 +280,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                         }
                       />
                     )}
+
                     <ActionButton
                       icon={
                         <FiPrinter className="w-[20px] h-[20px] opacity-70" />
@@ -338,6 +310,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         </tbody>
       </table>
 
+      {/* PAGINATOR */}
       <div className="join flex justify-center py-4">
         <button
           className="join-item btn"
@@ -346,6 +319,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         >
           ««
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(currentPage - 1)}
@@ -353,6 +327,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         >
           «
         </button>
+
         {[...Array(totalPages)].map((_, idx) => (
           <button
             key={idx}
@@ -364,6 +339,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
             {idx + 1}
           </button>
         ))}
+
         <button
           className="join-item btn"
           onClick={() => changePage(currentPage + 1)}
@@ -371,6 +347,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         >
           »
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(totalPages)}

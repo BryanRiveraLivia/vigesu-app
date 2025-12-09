@@ -1,15 +1,24 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { IGroup, StatusEnum } from "../models/GroupTypes";
+import { IGroup } from "../models/GroupTypes";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
-import axios from "axios";
-import {
-  getInspectionStatusGroupsLabel,
-  getInspectionStatusLabel,
-} from "@/shared/utils/utils";
+import { getInspectionStatusGroupsLabel } from "@/shared/utils/utils";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { FaRegEdit } from "react-icons/fa";
 import GroupModal from "./create/GroupModal";
+import Loading from "@/shared/components/shared/Loading";
+
+// 👇 Estructura que devuelve tu API de Group (como en el ejemplo que pasaste)
+interface GetGroupsResponse {
+  items: IGroup[];
+  pageNumber: number;
+  totalPages: number;
+  totalCount: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
 
 const TableList = ({
   objFilter,
@@ -17,61 +26,72 @@ const TableList = ({
   setRefreshFlag,
 }: TableListProps) => {
   const [allData, setAllData] = useState<IGroup[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [loading, setLoading] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<IGroup | null>(null);
 
   const handleSuccess = () => {
-    setSelectedGroup(null); // limpias el grupo seleccionado
-    setShowModal(false); // cierras el modal
-    setRefreshFlag((prev) => !prev); // refrescas la tabla
+    setSelectedGroup(null);
+    setShowModal(false);
+    // 🔁 Forzamos refetch desde el padre
+    setRefreshFlag((prev) => !prev);
   };
 
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const response = await axiosInstance.get("/Group");
-        if (response.data?.items) {
-          setAllData(response.data.items);
-        }
-      } catch (error) {
-        console.error("Error al cargar grupos", error);
+  const fetchGroups = async (page = 1) => {
+    setLoading(true);
+
+    try {
+      const params: Record<string, unknown> = {
+        PageNumber: page,
+        PageSize: rowsPerPage,
+      };
+
+      // 🔎 Filtros hacia el backend (ajusta nombres si tu API usa otros)
+      if (objFilter.client) {
+        params.Name = objFilter.client; // tu input "customer" realmente filtra por nombre
       }
-    };
+      if (objFilter.status !== "") {
+        params.Status = Number(objFilter.status);
+      }
 
-    fetchGroups();
-  }, [refreshFlag]);
+      const response = await axiosInstance.get<GetGroupsResponse>("/Group", {
+        params,
+      });
 
-  const filteredData = allData.filter((item) => {
-    const matchClient = objFilter.client
-      ? item.name.toLowerCase().includes(objFilter.client.toLowerCase())
-      : true;
-
-    const matchStatus =
-      objFilter.status !== "" ? item.status === Number(objFilter.status) : true;
-
-    return matchClient && matchStatus;
-  });
-
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIdx = (currentPage - 1) * rowsPerPage;
-  const currentRows = filteredData.slice(startIdx, startIdx + rowsPerPage);
-
-  const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+      const data = response.data;
+      setAllData(data.items ?? []);
+      setTotalRecords(data.totalCount ?? data.items?.length ?? 0);
+    } catch (error) {
+      console.error("Error al cargar grupos", error);
+      setAllData([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // 🔁 Refetch cuando cambian filtros, página, páginaSize o refreshFlag
+  useEffect(() => {
+    fetchGroups(currentPage);
+  }, [objFilter, refreshFlag, currentPage, rowsPerPage]);
+
+  // Cuando cambian filtros o rowsPerPage, regresamos a la página 1
   useEffect(() => {
     setCurrentPage(1);
   }, [objFilter, rowsPerPage]);
 
-  const getStatusBadge = (status: StatusEnum) => {
-    const label = status === StatusEnum.Active ? "Activo" : "Inactivo";
-    const color =
-      status === StatusEnum.Active ? "badge-success" : "badge-error";
+  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage));
 
-    return <div className={`badge ${color}`}>{label}</div>;
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   return (
@@ -86,37 +106,54 @@ const TableList = ({
             </tr>
           </thead>
           <tbody>
-            {currentRows.map((item) => (
-              <tr key={item.groupId} className="cursor-pointer odd:bg-base-200">
-                <td className="truncate">{item.name}</td>
-                <td className="text-center">
-                  <div
-                    className={`badge badge-dash ${
-                      item.status === 0
-                        ? "badge-success"
-                        : item.status === 1
-                          ? "badge-warning"
-                          : "badge-neutral"
-                    }`}
-                  >
-                    {getInspectionStatusGroupsLabel(item.status)}
-                  </div>
-                </td>
-
-                <td className="text-right">
-                  <ActionButton
-                    icon={
-                      <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
-                    }
-                    label="Edit"
-                    onClick={() => {
-                      setSelectedGroup(item);
-                      setShowModal(true);
-                    }}
-                  />
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="py-10 text-center">
+                  <Loading height="h-[200px]" />
                 </td>
               </tr>
-            ))}
+            ) : allData.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="py-6 text-center">
+                  No records found
+                </td>
+              </tr>
+            ) : (
+              allData.map((item) => (
+                <tr
+                  key={item.groupId}
+                  className="cursor-pointer odd:bg-base-200"
+                >
+                  <td className="truncate">{item.name}</td>
+                  <td className="text-center">
+                    <div
+                      className={`badge badge-dash ${
+                        item.status === 0
+                          ? "badge-success"
+                          : item.status === 1
+                            ? "badge-warning"
+                            : "badge-neutral"
+                      }`}
+                    >
+                      {getInspectionStatusGroupsLabel(item.status)}
+                    </div>
+                  </td>
+
+                  <td className="text-right">
+                    <ActionButton
+                      icon={
+                        <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
+                      }
+                      label="Edit"
+                      onClick={() => {
+                        setSelectedGroup(item);
+                        setShowModal(true);
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
 
@@ -136,6 +173,7 @@ const TableList = ({
           >
             «
           </button>
+
           {[...Array(totalPages)].map((_, idx) => (
             <button
               key={idx}
@@ -147,6 +185,7 @@ const TableList = ({
               {idx + 1}
             </button>
           ))}
+
           <button
             className="join-item btn"
             onClick={() => changePage(currentPage + 1)}
@@ -163,6 +202,7 @@ const TableList = ({
           </button>
         </div>
       </div>
+
       {showModal && selectedGroup && (
         <GroupModal
           onClose={() => {
