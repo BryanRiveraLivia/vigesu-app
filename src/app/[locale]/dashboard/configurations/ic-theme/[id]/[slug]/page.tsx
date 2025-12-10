@@ -71,9 +71,9 @@ const Page = () => {
     if (!match?.filePath) return null;
 
     // el backend devuelve "Templates/...", le anteponemos uploads/
-    const path = match.filePath.startsWith("uploads/")
+    const path = match.filePath.startsWith("/")
       ? match.filePath
-      : `uploads/${match.filePath}`;
+      : `/${match.filePath}`;
 
     // construye la URL absoluta correctamente
     const normalizedDomain = DOMAIN.endsWith("/") ? DOMAIN : `${DOMAIN}/`;
