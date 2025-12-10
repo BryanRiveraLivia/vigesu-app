@@ -1,16 +1,14 @@
-import { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  ignoreDuringBuilds: true,
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        canvas: "./empty-module.ts",
-      },
+  // Config propia de Turbopack (Next 16)
+  turbopack: {
+    resolveAlias: {
+      canvas: "./empty-module.ts",
     },
   },
+
+  // si tienes más cosas (images, i18n, etc.), déjalas aquí
 };
 
-const withNextIntl = createNextIntlPlugin();
-export default withNextIntl(nextConfig);
+export default nextConfig;
