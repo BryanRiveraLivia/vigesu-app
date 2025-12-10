@@ -1,8 +1,19 @@
+# netlify.toml
+
 [build]
   command = "npm run build:clean"
   publish = ".next"
 
-  [build.environment]
-    NODE_VERSION = "20"
-    NETLIFY_USE_YARN_CACHE = "false"
-    NETLIFY_USE_NPM_CACHE = "false"
+[build.environment]
+  NODE_VERSION = "20"
+  NETLIFY_USE_YARN_CACHE = "false"
+  NETLIFY_USE_NPM_CACHE = "false"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# 👇 Redirige la raíz a tu locale por defecto
+[[redirects]]
+  from = "/"
+  to = "/es"
+  status = 308
