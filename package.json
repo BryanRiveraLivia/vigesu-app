@@ -35,7 +35,7 @@
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
     "next": "^16.0.8",
-    "next-intl": "^4.1.0",
+    "next-intl": "^4.5.8",
     "pikaday": "^1.8.2",
     "puppeteer": "^24.15.0",
     "react": "^19.2.1",
