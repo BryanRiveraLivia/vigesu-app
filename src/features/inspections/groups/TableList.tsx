@@ -10,7 +10,7 @@ import { FaRegEdit } from "react-icons/fa";
 import GroupModal from "./create/GroupModal";
 import Loading from "@/shared/components/shared/Loading";
 
-// 👇 Estructura que devuelve tu API de Group (como en el ejemplo que pasaste)
+// Estructura que devuelve tu API de Group
 interface GetGroupsResponse {
   items: IGroup[];
   pageNumber: number;
@@ -36,13 +36,18 @@ const TableList = ({
   const [showModal, setShowModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<IGroup | null>(null);
 
+  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage));
+
   const handleSuccess = () => {
     setSelectedGroup(null);
     setShowModal(false);
-    // 🔁 Forzamos refetch desde el padre
+    // forzamos refetch desde el padre
     setRefreshFlag((prev) => !prev);
   };
 
+  // ==========================
+  // 🔹 FETCH DATA (PAGINATION)
+  // ==========================
   const fetchGroups = async (page = 1) => {
     setLoading(true);
 
@@ -52,10 +57,12 @@ const TableList = ({
         PageSize: rowsPerPage,
       };
 
-      // 🔎 Filtros hacia el backend (ajusta nombres si tu API usa otros)
+      // Filtros enviados al backend
       if (objFilter.client) {
-        params.Name = objFilter.client; // tu input "customer" realmente filtra por nombre
+        // tu input "customer" realmente filtra por nombre
+        params.Name = objFilter.client;
       }
+
       if (objFilter.status !== "") {
         params.Status = Number(objFilter.status);
       }
@@ -65,6 +72,7 @@ const TableList = ({
       });
 
       const data = response.data;
+
       setAllData(data.items ?? []);
       setTotalRecords(data.totalCount ?? data.items?.length ?? 0);
     } catch (error) {
@@ -76,9 +84,19 @@ const TableList = ({
     }
   };
 
-  // 🔁 Refetch cuando cambian filtros, página, páginaSize o refreshFlag
+  const changePage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // ==========================
+  // 🔹 EFFECTS
+  // ==========================
+  // Refetch cuando cambian filtros, refreshFlag, página o rowsPerPage
   useEffect(() => {
     fetchGroups(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objFilter, refreshFlag, currentPage, rowsPerPage]);
 
   // Cuando cambian filtros o rowsPerPage, regresamos a la página 1
@@ -86,14 +104,9 @@ const TableList = ({
     setCurrentPage(1);
   }, [objFilter, rowsPerPage]);
 
-  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage));
-
-  const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
+  // ==========================
+  // 🔹 VIEW
+  // ==========================
   return (
     <>
       <div className="overflow-x-auto space-y-4">
@@ -166,6 +179,7 @@ const TableList = ({
           >
             ««
           </button>
+
           <button
             className="join-item btn"
             onClick={() => changePage(currentPage - 1)}
@@ -174,17 +188,20 @@ const TableList = ({
             «
           </button>
 
-          {[...Array(totalPages)].map((_, idx) => (
-            <button
-              key={idx}
-              className={`join-item btn ${
-                currentPage === idx + 1 ? "btn-active" : ""
-              }`}
-              onClick={() => changePage(idx + 1)}
-            >
-              {idx + 1}
-            </button>
-          ))}
+          {Array.from({ length: totalPages }, (_, idx) => {
+            const page = idx + 1;
+            return (
+              <button
+                key={`page-${page}`}
+                className={`join-item btn ${
+                  currentPage === page ? "btn-active" : ""
+                }`}
+                onClick={() => changePage(page)}
+              >
+                {page}
+              </button>
+            );
+          })}
 
           <button
             className="join-item btn"
@@ -193,6 +210,7 @@ const TableList = ({
           >
             »
           </button>
+
           <button
             className="join-item btn"
             onClick={() => changePage(totalPages)}

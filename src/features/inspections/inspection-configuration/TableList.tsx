@@ -1,18 +1,15 @@
-//  Tabla dinámica para Inspections Configuration con API real
+// Tabla dinámica para Inspections Configuration con API real
 "use client";
 
 import { useEffect, useState } from "react";
 import { TableListProps } from "@/shared/types/inspection/ITypes";
 import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { FaRegEdit, FaRegEye } from "react-icons/fa";
+import { FaRegEdit } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getTypeInspections } from "@/features/inspections/inspection-configuration/api/typeInspectionApi";
 import { ITypeInspectionItem } from "./models/typeInspection";
 import { toast } from "sonner";
-import {
-  getInspectionStatusLabel,
-  getWorkOrderStatusLabel,
-} from "@/shared/utils/utils";
+import { getInspectionStatusLabel } from "@/shared/utils/utils";
 import Loading from "@/shared/components/shared/Loading";
 import { usePathname, useRouter } from "next/navigation";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
@@ -22,23 +19,30 @@ const TableList = ({ objFilter }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const router = useRouter();
   const pathname = usePathname();
+
   const [allData, setAllData] = useState<ITypeInspectionItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
+  const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+
+  // ==========================
+  // 🔹 FETCH DATA (PAGINATION)
+  // ==========================
+  const fetchData = async (page = 1) => {
     setLoading(true);
     try {
-      const { items, totalCount } = await getTypeInspections({
-        Name: objFilter.name, //  Solo esto es válido según Swagger
-        PageNumber: currentPage,
+      const { items, totalCount: total } = await getTypeInspections({
+        Name: objFilter.name, // según Swagger
+        PageNumber: page,
         PageSize: rowsPerPage,
       });
 
-      // Mapear y mostrar (sin filtros frontend)
-      const mappedItems: ITypeInspectionItem[] = items.map((item) => ({
+      const mappedItems: ITypeInspectionItem[] = (items ?? []).map((item) => ({
         typeInspectionId: item.typeInspectionId,
         templateInspectionId: item.templateInspectionId,
         customerId: item.customerId,
@@ -48,23 +52,25 @@ const TableList = ({ objFilter }: TableListProps) => {
       }));
 
       setAllData(mappedItems);
-      setTotalCount(totalCount);
+      setTotalCount(total ?? mappedItems.length);
     } catch (error) {
+      console.error(error);
       toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const totalPages = Math.ceil(totalCount / rowsPerPage);
-
   const changePage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
   const deleteTypeInspection = async (id: number) => {
     try {
       setLoading(true);
+
       await axiosInstance.put(
         `/TypeInspection/UpdateTypeInspectionState/${id}`,
         {
@@ -73,22 +79,29 @@ const TableList = ({ objFilter }: TableListProps) => {
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.4")}`);
-      fetchData();
+      await fetchData(currentPage);
     } catch (error) {
+      console.error(error);
       toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setLoading(false);
     }
   };
 
+  // ==========================
+  // 🔹 EFFECTS
+  // ==========================
   useEffect(() => {
-    fetchData();
+    fetchData(currentPage);
   }, [objFilter, currentPage, rowsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [objFilter]);
+  }, [objFilter, rowsPerPage]);
 
+  // ==========================
+  // 🔹 VIEW
+  // ==========================
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">
@@ -103,8 +116,14 @@ const TableList = ({ objFilter }: TableListProps) => {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={5} className="py-10 text-center">
+              <td colSpan={4} className="py-10 text-center">
                 <Loading height="h-[200px]" />
+              </td>
+            </tr>
+          ) : allData.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="py-6 text-center">
+                No records found
               </td>
             </tr>
           ) : (
@@ -115,7 +134,7 @@ const TableList = ({ objFilter }: TableListProps) => {
               >
                 <td className="truncate">{item.name}</td>
                 <td className="truncate">{item.description}</td>
-                <td>
+                <td className="text-center">
                   {item.status === 0 && (
                     <div className="badge badge-dash badge-success mx-auto whitespace-nowrap">
                       {getInspectionStatusLabel(item.status)}
@@ -164,6 +183,7 @@ const TableList = ({ objFilter }: TableListProps) => {
         >
           ««
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(currentPage - 1)}
@@ -171,21 +191,21 @@ const TableList = ({ objFilter }: TableListProps) => {
         >
           «
         </button>
-        {totalPages > 0 &&
-          Array.from({ length: totalPages }, (_, idx) => {
-            const page = idx + 1;
-            return (
-              <button
-                key={`page-${page}`}
-                className={`join-item btn ${
-                  currentPage === page ? "btn-active" : ""
-                }`}
-                onClick={() => changePage(page)}
-              >
-                {page}
-              </button>
-            );
-          })}
+
+        {Array.from({ length: totalPages }, (_, idx) => {
+          const page = idx + 1;
+          return (
+            <button
+              key={`page-${page}`}
+              className={`join-item btn ${
+                currentPage === page ? "btn-active" : ""
+              }`}
+              onClick={() => changePage(page)}
+            >
+              {page}
+            </button>
+          );
+        })}
 
         <button
           className="join-item btn"
@@ -194,6 +214,7 @@ const TableList = ({ objFilter }: TableListProps) => {
         >
           »
         </button>
+
         <button
           className="join-item btn"
           onClick={() => changePage(totalPages)}
