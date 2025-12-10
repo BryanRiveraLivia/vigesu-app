@@ -68,17 +68,17 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
   const inspectionsLinks = [
     {
       label: t("module2.menu1"),
-      href: "/dashboard/inspections/inspection-configuration",
+      href: "/dashboard/catalogs/inspection-configuration",
       icon: <SlSettings />,
     },
     {
       label: t("module2.menu2"),
-      href: "/dashboard/inspections/groups",
+      href: "/dashboard/catalogs/groups",
       icon: <SlLayers />,
     },
     {
       label: t("module2.menu3"),
-      href: "/dashboard/inspections/users",
+      href: "/dashboard/catalogs/users",
       icon: <SlUser />,
     },
   ];
