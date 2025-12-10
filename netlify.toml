@@ -1,7 +1,8 @@
 [build]
-  # Elimina .next antes de compilar para evitar caché residual
-  command = "rm -rf .next && npm run build"
+  command = "npm run build:clean"
   publish = ".next"
+
+
 
   [build.environment]
     NODE_VERSION = "18"
