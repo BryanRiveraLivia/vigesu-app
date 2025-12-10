@@ -48,12 +48,12 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       ? [
           {
             label: t("module1.menu1"),
-            href: "/dashboard/orders/work-orders",
+            href: "/dashboard/documents/work-orders",
             icon: <SlBookOpen />,
           },
           {
             label: t("module1.menu2"),
-            href: "/dashboard/orders/inspections",
+            href: "/dashboard/documents/inspections",
             icon: <SlNote />,
           },
         ]

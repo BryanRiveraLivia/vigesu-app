@@ -74,7 +74,7 @@ export default function Home() {
       if (existingToken && existingToken.trim() !== "") {
         // Ya está todo ok, no hace falta abrir nada
         toast.success("QuickBooks ya estaba conectado.");
-        router.push("/dashboard/orders/work-orders");
+        router.push("/dashboard/documents/work-orders");
         return;
       }
 
@@ -137,7 +137,7 @@ export default function Home() {
           setQbErrorMessage(null);
 
           toast.success("QuickBooks conectado correctamente.");
-          router.push("/dashboard/orders/work-orders");
+          router.push("/dashboard/documents/work-orders");
           return;
         }
 

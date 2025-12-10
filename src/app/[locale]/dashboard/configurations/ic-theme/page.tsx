@@ -63,7 +63,7 @@ const Page = () => {
                 {tGeneral("btnNew")}
               </span>
             </Link>
-            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
+            <button className="btn bg-red-600 rounded-full pr-3 py-6 !hidden sm:flex items-center justify-center border-none">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
                 {tGeneral("btnDelete")}
@@ -74,9 +74,7 @@ const Page = () => {
         <div className="boddy-app overflow-y-auto ">
           <div className="container max-w-full mb-5">
             <div role="alert" className="alert alert-info alert-soft mb-4">
-              <span className="text-lg">
-                {t("info_alert")}
-              </span>
+              <span className="text-lg">{t("info_alert")}</span>
             </div>
             <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
               <legend className="fieldset-legend text-lg">

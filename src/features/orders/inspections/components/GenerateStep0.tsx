@@ -18,7 +18,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { group } from "console";
-import Page from "@/app/[locale]/dashboard/orders/work-orders/edit/page";
+import Page from "@/app/[locale]/dashboard/documents/work-orders/edit/page";
 import GenerateStep1 from "./GenerateStep1";
 import GenerateStep2 from "./GenerateStep2";
 import GenerateStep3 from "./GenerateStep3";

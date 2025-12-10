@@ -15,11 +15,11 @@ export async function GET(req: NextRequest) {
 
   switch (type) {
     case "liftgate":
-      pdfUrl = `${baseUrl}/${locale}/dashboard/orders/inspections/generate-pdf/${id}?preview=true`;
+      pdfUrl = `${baseUrl}/${locale}/dashboard/documents/inspections/generate-pdf/${id}?preview=true`;
       fileNamePDF = `Inspection-${id}.pdf`;
       break;
     default:
-      pdfUrl = `${baseUrl}/${locale}/dashboard/orders/work-orders/generate-pdf/${id}?preview=true`;
+      pdfUrl = `${baseUrl}/${locale}/dashboard/documents/work-orders/generate-pdf/${id}?preview=true`;
       fileNamePDF = `WorkOrder-${id}.pdf`;
       break;
   }

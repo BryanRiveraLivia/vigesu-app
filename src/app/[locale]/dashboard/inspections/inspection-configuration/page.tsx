@@ -91,10 +91,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton
-            title={!title ? t("new_title") : title}
-            disableArrow
-          />
+          <BackButton title={!title ? t("new_title") : title} disableArrow />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/create`}
@@ -111,7 +108,7 @@ const Page = () => {
                 {tGeneral("btnSearch")}
               </span>
             </button>
-            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none !hidden">
+            <button className="btn bg-red-600 rounded-full pr-3 py-6 !hidden sm:flex items-center justify-center border-none !hidden">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
                 {tGeneral("btnDelete")}

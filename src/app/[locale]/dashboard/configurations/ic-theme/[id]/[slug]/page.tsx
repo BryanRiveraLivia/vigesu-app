@@ -85,7 +85,7 @@ const Page = () => {
       <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
         <BackButton link="../" title={deslugify(params?.slug)} />
         <div className="flex flex-row gap-2">
-          <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
+          <button className="btn bg-red-600 rounded-full pr-3 py-6 !hidden sm:flex items-center justify-center border-none">
             <FiTrash2 className="text-xl text-white" />
             <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
               {tGeneral("btnDelete")}

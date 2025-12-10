@@ -17,14 +17,14 @@ const Page = () => {
   const pathname = usePathname();
   const pageTitle = usePageTitle();
   const t = useTranslations("groups");
-  
-    const tAside = useTranslations("aside");
+
+  const tAside = useTranslations("aside");
   const tGeneral = useTranslations("general");
 
   const [showModal, setShowModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  
-    const [title, setTitle] = useState<string>("");
+
+  const [title, setTitle] = useState<string>("");
 
   const handleSuccess = () => {
     setRefreshFlag(!refreshFlag);
@@ -59,7 +59,10 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton disableArrow title={!title ? tAside("module2.menu2") : title} />
+          <BackButton
+            disableArrow
+            title={!title ? tAside("module2.menu2") : title}
+          />
           <div className="flex flex-row gap-2">
             <button
               onClick={() => setShowModal(true)}
@@ -70,7 +73,7 @@ const Page = () => {
                 {tGeneral("btnNew")}
               </span>
             </button>
-            <button className="btn bg-red-600 rounded-full pr-3 py-6 hidden sm:flex items-center justify-center border-none">
+            <button className="btn bg-red-600 rounded-full pr-3 py-6 !hidden sm:flex items-center justify-center border-none">
               <FiTrash2 className="text-xl text-white" />
               <span className="bg-red-500 py-1 px-4 text-white font-normal rounded-full hidden md:block text-[13px] ">
                 {tGeneral("btnDelete")}
