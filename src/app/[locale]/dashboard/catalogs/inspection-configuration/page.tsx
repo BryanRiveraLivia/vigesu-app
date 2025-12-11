@@ -91,7 +91,7 @@ const Page = () => {
     <>
       <div className="gap-4 flex flex-col  min-h-full ">
         <div className="header-page flex flex-row items-center justify-between min-h-[70px] bg-base-200 px-6 gap-2">
-          <BackButton title={!title ? t("new_title") : title} disableArrow />
+          <BackButton title={!title ? t("title") : title} disableArrow />
           <div className="flex flex-row gap-2">
             <Link
               href={`${pathname}/create`}
