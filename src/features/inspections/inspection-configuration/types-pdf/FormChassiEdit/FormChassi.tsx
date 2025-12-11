@@ -404,7 +404,7 @@ const FormChassi: React.FC<FormChassiProps> = ({
                       </div>
                     </td>
                     <td className="text-center">
-                      <label className="rounded-full text-sm bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex">
+                      <label className="rounded-full text-sm bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex truncate">
                         {" "}
                         <IoIosInformationCircleOutline className="size-6" />
                         {getTypeQuestionLabel(q.typeQuestion)}

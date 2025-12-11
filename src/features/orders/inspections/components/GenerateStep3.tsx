@@ -537,7 +537,7 @@ const GenerateStep3 = () => {
           <h1 className="text-2xl font-bold order-2 md:order-1">
             {t("step3.1")} {titleQuestion}
           </h1>
-          <label className="rounded-full bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex">
+          <label className="rounded-full bg-red-400 order-1 md:order-2  md:flex items-center justify-center text-white overflow-hidden px-3 gap-1 py-1  md:min-w-fit flex-row flex truncate">
             <IoIosInformationCircleOutline className="size-6" />
             {fullQuestion?.typeQuestion !== undefined
               ? TypeQuestionLabel[fullQuestion.typeQuestion as TypeQuestion]
