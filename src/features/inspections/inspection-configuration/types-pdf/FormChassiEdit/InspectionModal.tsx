@@ -72,7 +72,7 @@ const InspectionModal: React.FC<Props> = ({
 
   useEffect(() => {
     axiosInstance
-      .get("/Group?PageSize=100")
+      .get("/Group/GetGroupAll")
       .then((res) => setGroups(res.data.items || []))
       .catch((err) => console.error("Error al cargar grupos:", err));
   }, []);

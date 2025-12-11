@@ -142,7 +142,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
     const fetchInitialData = async () => {
       try {
         const [templateRes] = await Promise.all([
-          axiosInstance.get("/TemplateInspection"),
+          axiosInstance.get("/TemplateInspection/GetTemplateInspectinAll"),
         ]);
         const items = templateRes.data.items;
         setTemplates(
