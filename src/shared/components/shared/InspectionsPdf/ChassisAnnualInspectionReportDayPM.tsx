@@ -36,30 +36,57 @@ const PASS_SET = new Set(["PASS", "OK", "YES", "Y", "TRUE", "1"]);
 const FAIL_SET = new Set(["FAIL", "X", "NO", "N", "FALSE", "0"]);
 const REPAIR_SET = new Set(["REPAIR", "R", "FIX", "NEEDS REPAIR"]);
 
-const getPassFailRepair = (detail?: MinimalDetail | null): PFR => {
-  const values = [
-    norm(detail?.finalResponse),
-    ...(detail?.inspectionDetailAnswers ?? []).map((a) => norm(a.response)),
-  ].filter(Boolean);
+type Choice = "PASS" | "FAIL" | "REPAIR" | null;
 
-  return {
-    pass: values.some((v) => PASS_SET.has(v)),
-    fail: values.some((v) => FAIL_SET.has(v)),
-    repair: values.some((v) => REPAIR_SET.has(v)),
-  };
+const toChoice = (raw?: string | null): Choice => {
+  const v = norm(raw);
+  if (!v) return null;
+
+  if (PASS_SET.has(v)) return "PASS";
+  if (FAIL_SET.has(v)) return "FAIL";
+  if (REPAIR_SET.has(v)) return "REPAIR";
+  return null;
+};
+
+const choiceToPfr = (choice: Choice): PFR => ({
+  pass: choice === "PASS",
+  fail: choice === "FAIL",
+  repair: choice === "REPAIR",
+});
+
+/**
+ * Fuerza 1 sola marca:
+ * - Prioridad 1: finalResponse (si es válido)
+ * - Fallback: primera respuesta válida encontrada en inspectionDetailAnswers
+ *   (si hay varias, no marcamos múltiples)
+ */
+const getPassFailRepair = (detail?: MinimalDetail | null): PFR => {
+  const finalChoice = toChoice(detail?.finalResponse);
+  if (finalChoice) return choiceToPfr(finalChoice);
+
+  const answers = detail?.inspectionDetailAnswers ?? [];
+  for (const a of answers) {
+    const c = toChoice(a.response);
+    if (c) return choiceToPfr(c);
+  }
+
+  return choiceToPfr(null);
 };
 
 type YesNo = { yes: boolean; no: boolean };
 const getYesNo = (detail?: MinimalDetail | null): YesNo => {
-  const values = [
-    norm(detail?.finalResponse),
-    ...(detail?.inspectionDetailAnswers ?? []).map((a) => norm(a.response)),
-  ].filter(Boolean);
+  const finalChoice = toChoice(detail?.finalResponse);
+  if (finalChoice) {
+    return { yes: finalChoice === "PASS", no: finalChoice === "FAIL" };
+  }
 
-  return {
-    yes: values.some((v) => PASS_SET.has(v)),
-    no: values.some((v) => FAIL_SET.has(v)),
-  };
+  const answers = detail?.inspectionDetailAnswers ?? [];
+  for (const a of answers) {
+    const c = toChoice(a.response);
+    if (c) return { yes: c === "PASS", no: c === "FAIL" };
+  }
+
+  return { yes: false, no: false };
 };
 
 const ReadonlyCheckbox: FC<{ checked?: boolean; className?: string }> = ({
