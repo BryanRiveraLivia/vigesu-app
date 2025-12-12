@@ -1,6 +1,6 @@
 import { PropsPDF } from "@/shared/types/inspection/ITypes";
 import clsx from "clsx";
-import React, { FC, useMemo } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import logo from "@/shared/img/logoQMSFORM.png";
 import Image from "next/image";
 import TreadDepthTable from "../TreadDepthTable";
@@ -16,56 +16,101 @@ interface InputLineProps {
   isEditable?: boolean;
 }
 
+type MinimalAnswer = { response?: string | null };
+type MinimalDetail = {
+  finalResponse?: string | null;
+  inspectionDetailAnswers?: MinimalAnswer[];
+};
+
+type PFR = { pass: boolean; fail: boolean; repair: boolean };
+
+const norm = (v?: string | null) => (v ?? "").trim().toUpperCase();
+
+/**
+ * Compatibilidad:
+ * - Backend: PASS/FAIL/REPAIR
+ * - Legacy: OK/X/R
+ * - Variantes: YES/NO (para checks tipo Yes/No)
+ */
+const PASS_SET = new Set(["PASS", "OK", "YES", "Y", "TRUE", "1"]);
+const FAIL_SET = new Set(["FAIL", "X", "NO", "N", "FALSE", "0"]);
+const REPAIR_SET = new Set(["REPAIR", "R", "FIX", "NEEDS REPAIR"]);
+
+const getPassFailRepair = (detail?: MinimalDetail | null): PFR => {
+  const values = [
+    norm(detail?.finalResponse),
+    ...(detail?.inspectionDetailAnswers ?? []).map((a) => norm(a.response)),
+  ].filter(Boolean);
+
+  return {
+    pass: values.some((v) => PASS_SET.has(v)),
+    fail: values.some((v) => FAIL_SET.has(v)),
+    repair: values.some((v) => REPAIR_SET.has(v)),
+  };
+};
+
+type YesNo = { yes: boolean; no: boolean };
+const getYesNo = (detail?: MinimalDetail | null): YesNo => {
+  const values = [
+    norm(detail?.finalResponse),
+    ...(detail?.inspectionDetailAnswers ?? []).map((a) => norm(a.response)),
+  ].filter(Boolean);
+
+  return {
+    yes: values.some((v) => PASS_SET.has(v)),
+    no: values.some((v) => FAIL_SET.has(v)),
+  };
+};
+
+const ReadonlyCheckbox: FC<{ checked?: boolean; className?: string }> = ({
+  checked = false,
+  className,
+}) => {
+  return (
+    <input
+      type="checkbox"
+      className={clsx("checkbox", className)}
+      checked={checked}
+      readOnly
+    />
+  );
+};
+
+const EditableTextarea: FC<{
+  value?: string;
+  isEditable?: boolean;
+  className?: string;
+}> = ({ value = "", isEditable = false, className }) => {
+  const [local, setLocal] = useState(value);
+
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
+
+  return (
+    <textarea
+      className={clsx("w-full bg-black/3 p-2 rounded-lg text-base", className)}
+      value={local}
+      onChange={(e) => {
+        if (!isEditable) return;
+        setLocal(e.target.value);
+      }}
+      readOnly={!isEditable}
+    />
+  );
+};
+
 const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
   data,
   inspectionDetails,
   isEditable,
 }) => {
   const { day, month, year } = getTodayParts();
-  console.log("data", data);
-  console.log("details", inspectionDetails);
+
   const matchById = useMemo(
     () => buildQuestionMatcherGeneric(data, inspectionDetails),
     [data, inspectionDetails]
   );
-
-  type MarkResult = { ok: boolean; fail: boolean };
-
-  const markCheck = (response: string): MarkResult => {
-    const r = (response ?? "").trim().toUpperCase();
-
-    if (!r) return { ok: false, fail: false };
-    if (r === "OK") return { ok: true, fail: false };
-    return { ok: false, fail: true };
-  };
-
-  type MinimalAnswer = { response?: string | null };
-  type MinimalDetail = {
-    finalResponse?: string | null;
-    inspectionDetailAnswers?: MinimalAnswer[];
-  };
-
-  type PFR = { pass: boolean; fail: boolean; repair: boolean };
-
-  /**
-   * Solo considera exactamente "OK", "X" y "R".
-   * - Marca true si aparece en finalResponse o en cualquier inspectionDetailAnswers.
-   * - No aplica prioridades: pueden ser múltiples true si coexisten (p.ej. final "X" y un answer "R").
-   */
-  const getPassFailRepairStrict = (detail?: MinimalDetail | null): PFR => {
-    const norm = (v?: string | null) => (v ?? "").trim().toUpperCase();
-
-    const values = [
-      norm(detail?.finalResponse),
-      ...(detail?.inspectionDetailAnswers ?? []).map((a) => norm(a.response)),
-    ].filter(Boolean);
-
-    return {
-      pass: values.includes("OK"),
-      fail: values.includes("X"),
-      repair: values.includes("R"),
-    };
-  };
 
   return (
     <div>
@@ -103,6 +148,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
             />
           </div>
         </div>
+
         <div className="px-[30px] pt-6 pb-3 gap-4 flex flex-row items-center justify-between w-full  overflow-x-auto">
           <div className="flex flex-col gap-3 w-1/3 items-center md:items-start">
             <InputLine
@@ -118,6 +164,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
               id={0}
             />
           </div>
+
           <div className="flex flex-col gap-3 w-1/3 items-center">
             <InputLine
               isEditable={isEditable}
@@ -132,6 +179,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
               id={0}
             />
           </div>
+
           <div className="flex flex-col gap-3 w-1/3 items-center md:items-end">
             <InputLine
               isEditable={isEditable}
@@ -148,6 +196,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
           </div>
         </div>
       </div>
+
       <div className="body  w-full overflow-x-auto">
         <table className="w-full border-collapse border">
           <TableSystemHead
@@ -156,6 +205,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
             col3="Fail"
             col4="Repair"
           />
+
           <tbody>
             <tr className="h-[47px]">
               <td className="p-2 text-left border-r">
@@ -163,30 +213,29 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
                   <div>
                     <span className="whitespace-nowrap">ABS</span>
                   </div>
+
+                  {/**
+                   * ABS Yes/No (questionId 262):
+                   * backend puede venir PASS/FAIL o YES/NO.
+                   */}
                   <div className="flex flex-row justify-center items-center gap-10 w-full">
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <span>Yes</span>
-                      <input
-                        type="checkbox"
-                        defaultChecked={
-                          markCheck(matchById(262)?.detail?.finalResponse ?? "")
-                            .ok
-                        }
-                        className="checkbox"
-                      />
-                    </div>
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <span>No</span>
-                      <input
-                        type="checkbox"
-                        className="checkbox"
-                        defaultChecked={
-                          markCheck(matchById(262)?.detail?.finalResponse ?? "")
-                            .fail
-                        }
-                      />
-                    </div>
+                    {(() => {
+                      const yn = getYesNo(matchById(262)?.detail);
+                      return (
+                        <>
+                          <div className="flex flex-row items-center justify-center gap-2">
+                            <span>Yes</span>
+                            <ReadonlyCheckbox checked={yn.yes} />
+                          </div>
+                          <div className="flex flex-row items-center justify-center gap-2">
+                            <span>No</span>
+                            <ReadonlyCheckbox checked={yn.no} />
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
+
                   <div>
                     <span className="whitespace-nowrap">
                       ABS System Function
@@ -194,84 +243,63 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
                   </div>
                 </div>
               </td>
-              <td className="p-2 text-center">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  defaultChecked={
-                    getPassFailRepairStrict(matchById(263)?.detail).pass
-                  }
-                />
-              </td>
-              <td className="p-2 text-center border-l border-r">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  defaultChecked={
-                    getPassFailRepairStrict(matchById(263)?.detail).fail
-                  }
-                />
-              </td>
-              <td className="p-2 text-center">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  defaultChecked={
-                    getPassFailRepairStrict(matchById(263)?.detail).repair
-                  }
-                />
-              </td>
+
+              {/**
+               * P/F/R (questionId 263) -> PASS/FAIL/REPAIR (o OK/X/R)
+               */}
+              {(() => {
+                const pfr = getPassFailRepair(matchById(263)?.detail);
+                return (
+                  <>
+                    <td className="p-2 text-center">
+                      <ReadonlyCheckbox checked={pfr.pass} />
+                    </td>
+                    <td className="p-2 text-center border-l border-r">
+                      <ReadonlyCheckbox checked={pfr.fail} />
+                    </td>
+                    <td className="p-2 text-center">
+                      <ReadonlyCheckbox checked={pfr.repair} />
+                    </td>
+                  </>
+                );
+              })()}
             </tr>
           </tbody>
+
           <TableSystemBody
             label="Service brakes - no absence of braking action"
-            checkPass={getPassFailRepairStrict(matchById(264)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(264)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(264)?.detail).repair}
+            pfr={getPassFailRepair(matchById(264)?.detail)}
           />
           <TableSystemBody
             label="Inspect for cracked, broken, missing, loose, deformed, brake parts"
-            checkPass={getPassFailRepairStrict(matchById(265)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(265)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(265)?.detail).repair}
+            pfr={getPassFailRepair(matchById(265)?.detail)}
           />
           <TableSystemBody
             label="No audible air leaks"
-            checkPass={getPassFailRepairStrict(matchById(266)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(266)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(266)?.detail).repair}
+            pfr={getPassFailRepair(matchById(266)?.detail)}
           />
           <TableSystemBody
             label="Inspect brake drums for external cracking or missing pieces"
-            checkPass={getPassFailRepairStrict(matchById(267)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(267)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(267)?.detail).repair}
+            pfr={getPassFailRepair(matchById(267)?.detail)}
           />
           <TableSystemBody
             label="Check and adjust travel on brake chamber"
-            checkPass={getPassFailRepairStrict(matchById(268)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(268)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(268)?.detail).repair}
+            pfr={getPassFailRepair(matchById(268)?.detail)}
           />
           <TableSystemBody
             label="Measure brake lining thickness"
-            checkPass={getPassFailRepairStrict(matchById(269)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(269)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(269)?.detail).repair}
+            pfr={getPassFailRepair(matchById(269)?.detail)}
           />
           <TableSystemBody
-            label="Inspect brake hoses,tubing, air lines, couplings, fittings, gladhands, and gladhand season - NO kicks, or blockages. NO worn;
-frated loose hoses or lines. NO hoses in contact with moving parts"
-            checkPass={getPassFailRepairStrict(matchById(270)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(270)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(270)?.detail).repair}
+            label={`Inspect brake hoses,tubing, air lines, couplings, fittings, gladhands, and gladhand season - NO kicks, or blockages. NO worn;
+frated loose hoses or lines. NO hoses in contact with moving parts`}
+            pfr={getPassFailRepair(matchById(270)?.detail)}
           />
           <TableSystemBody
             label="Drain air tanks"
-            checkPass={getPassFailRepairStrict(matchById(271)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(271)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(271)?.detail).repair}
+            pfr={getPassFailRepair(matchById(271)?.detail)}
           />
+
           <TableSystemHead
             title="Suspensión"
             col2="Pass"
@@ -280,12 +308,11 @@ frated loose hoses or lines. NO hoses in contact with moving parts"
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect Ubolts; spring hangers; spring assembies; leaves; torque radius or tracking compnents; axles or any other axle
-positioning parts. NO cracked; broken loose or missing parts"
-            checkPass={getPassFailRepairStrict(matchById(272)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(272)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(272)?.detail).repair}
+            label={`Inspect Ubolts; spring hangers; spring assembies; leaves; torque radius or tracking compnents; axles or any other axle
+positioning parts. NO cracked; broken loose or missing parts`}
+            pfr={getPassFailRepair(matchById(272)?.detail)}
           />
+
           <TableSystemHead
             title="Coupling Device"
             col2="Pass"
@@ -294,13 +321,12 @@ positioning parts. NO cracked; broken loose or missing parts"
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect Kinpin; upper coupler plate, slider, pintle hook, pintle hook latch, frame member providing support/attachment to the
+            label={`Inspect Kinpin; upper coupler plate, slider, pintle hook, pintle hook latch, frame member providing support/attachment to the
 pintle hook; fasteners; NO broken or cracked components. NO cracked welds or parent metal. NO excessive wear or chipping
-of kinpin lip"
-            checkPass={getPassFailRepairStrict(matchById(273)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(273)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(273)?.detail).repair}
+of kinpin lip`}
+            pfr={getPassFailRepair(matchById(273)?.detail)}
           />
+
           <TableSystemHead
             title="Locking Devices"
             col2="Pass"
@@ -309,12 +335,11 @@ of kinpin lip"
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect all twist locks , puch pins, handles, and safety devices; NO cracked welds; NO ineffective parts; NO excessively worn,
-bent; broken or missing parts."
-            checkPass={getPassFailRepairStrict(matchById(274)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(274)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(274)?.detail).repair}
+            label={`Inspect all twist locks , puch pins, handles, and safety devices; NO cracked welds; NO ineffective parts; NO excessively worn,
+bent; broken or missing parts.`}
+            pfr={getPassFailRepair(matchById(274)?.detail)}
           />
+
           <TableSystemHead
             title="Slider Assembly (IF required)"
             col2="Pass"
@@ -323,12 +348,11 @@ bent; broken or missing parts."
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect for missing, broken, damaged, binding. Inoperative, worn, or cracked parts,. NO damage or bends to slider stops. NO
-elongated slider lock apertures in frame. NO cracked, or improper welds to any components or parent metal."
-            checkPass={getPassFailRepairStrict(matchById(275)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(275)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(275)?.detail).repair}
+            label={`Inspect for missing, broken, damaged, binding. Inoperative, worn, or cracked parts,. NO damage or bends to slider stops. NO
+elongated slider lock apertures in frame. NO cracked, or improper welds to any components or parent metal.`}
+            pfr={getPassFailRepair(matchById(275)?.detail)}
           />
+
           <TableSystemHead
             title="Frame"
             col2="Pass"
@@ -337,12 +361,11 @@ elongated slider lock apertures in frame. NO cracked, or improper welds to any c
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect main rails, bolsters, crossmembers, ICC bumper, light boxes, mudlfap hangers. NO cracked welds or parent metal; NO
-broken, missing loose, sagging parts, no parts bent to affect melting of container to chassis."
-            checkPass={getPassFailRepairStrict(matchById(276)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(276)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(276)?.detail).repair}
+            label={`Inspect main rails, bolsters, crossmembers, ICC bumper, light boxes, mudlfap hangers. NO cracked welds or parent metal; NO
+broken, missing loose, sagging parts, no parts bent to affect melting of container to chassis.`}
+            pfr={getPassFailRepair(matchById(276)?.detail)}
           />
+
           <TableSystemHead
             title="Landing Gear"
             col2="Pass"
@@ -351,12 +374,11 @@ broken, missing loose, sagging parts, no parts bent to affect melting of contain
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect legs, sandshoes, mounting boxes, braces, cross shaft, and all mounting hardware; Check operation of landing gear in
-both directions. NO cracked welds or parent metal. NO broken, missing, or loose part or fasteners. All parts function properly."
-            checkPass={getPassFailRepairStrict(matchById(277)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(277)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(277)?.detail).repair}
+            label={`Inspect legs, sandshoes, mounting boxes, braces, cross shaft, and all mounting hardware; Check operation of landing gear in
+both directions. NO cracked welds or parent metal. NO broken, missing, or loose part or fasteners. All parts function properly.`}
+            pfr={getPassFailRepair(matchById(277)?.detail)}
           />
+
           <TableSystemHead
             title="Electrical"
             col2="Pass"
@@ -366,10 +388,9 @@ both directions. NO cracked welds or parent metal. NO broken, missing, or loose 
           />
           <TableSystemBody
             label="Inspect seven way, wiring harness, lighting devices and reflectors. NO broken, inoperative missing or loose parts."
-            checkPass={getPassFailRepairStrict(matchById(278)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(278)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(278)?.detail).repair}
+            pfr={getPassFailRepair(matchById(278)?.detail)}
           />
+
           <TableSystemHead
             title="Wheels & Rims"
             col2="Pass"
@@ -378,12 +399,11 @@ both directions. NO cracked welds or parent metal. NO broken, missing, or loose 
             enableBorderTop
           />
           <TableSystemBody
-            label="Inspect all wheels, rim spacers, and fastners. NO bent, broken, cracked, improperly seated, sprung or mismatched parts. NO
-elongated bolt holes or stripped parts."
-            checkPass={getPassFailRepairStrict(matchById(279)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(279)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(279)?.detail).repair}
+            label={`Inspect all wheels, rim spacers, and fastners. NO bent, broken, cracked, improperly seated, sprung or mismatched parts. NO
+elongated bolt holes or stripped parts.`}
+            pfr={getPassFailRepair(matchById(279)?.detail)}
           />
+
           <TableSystemHead
             title="Tires"
             col2="Pass"
@@ -394,10 +414,9 @@ elongated bolt holes or stripped parts."
           <TableSystemBody
             label={`Inspect all tires for, noticable leaks, proper mating; separations; cuts through one or more ply of fabric; NO spot on tire with
 tread depth 2/32" or below when measured in major tread grove. Air all tires to 100PSI (+/- 5PSI).`}
-            checkPass={getPassFailRepairStrict(matchById(280)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(280)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(280)?.detail).repair}
+            pfr={getPassFailRepair(matchById(280)?.detail)}
           />
+
           <TableSystemHead
             title="Lubrication"
             col2="Pass"
@@ -408,10 +427,9 @@ tread depth 2/32" or below when measured in major tread grove. Air all tires to 
           <TableSystemBody
             label={`Lube all fittings on landing gears, gear boxes, slack adjusters, brake cams, twist locks, pushpins, slider mechanisms and sub-
 frames, add oil to wheel hubs (if equipped with oil bath bearings)`}
-            checkPass={getPassFailRepairStrict(matchById(281)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(281)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(281)?.detail).repair}
+            pfr={getPassFailRepair(matchById(281)?.detail)}
           />
+
           <TableSystemHead
             title="Documentation / Misc"
             col2="Pass"
@@ -423,9 +441,7 @@ frames, add oil to wheel hubs (if equipped with oil bath bearings)`}
             label={`Check to ensure license plate is current, and that license plate, registration and chassis are properly mathced. Ensure that
 current registration and copy of most current FMCSA Inspection is in document holder. Ensure unit number is clearly markerd
 and are correct. Ensure that mudflaps are intact and secured to chassis.`}
-            checkPass={getPassFailRepairStrict(matchById(282)?.detail).pass}
-            checkFail={getPassFailRepairStrict(matchById(282)?.detail).fail}
-            checkRepair={getPassFailRepairStrict(matchById(282)?.detail).repair}
+            pfr={getPassFailRepair(matchById(282)?.detail)}
           />
         </table>
       </div>
@@ -440,6 +456,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
           Appendix G subpart B
         </p>
       </div>
+
       <div className="flex flex-col md:flex-row gap-1 justify-between">
         <div className="w-full">
           <TreadDepthTable
@@ -465,6 +482,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(286)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center !text-[11px] font-bold">
                 2nd Axle
@@ -482,6 +500,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(290)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center !text-[11px] font-bold">
                 3rd Axle
@@ -499,6 +518,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(294)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center !text-[11px] font-bold">
                 4th Axle
@@ -516,6 +536,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(298)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center !text-[11px] font-bold">
                 5th Axle
@@ -535,6 +556,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
             </tr>
           </TreadDepthTable>
         </div>
+
         <div className="w-full">
           <TreadDepthTable
             isEditable={isEditable}
@@ -571,6 +593,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(310)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(311)?.detail?.finalResponse}
@@ -585,6 +608,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(314)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(315)?.detail?.finalResponse}
@@ -599,6 +623,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(318)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(319)?.detail?.finalResponse}
@@ -615,6 +640,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
             </tr>
           </TreadDepthTable>
         </div>
+
         <div className="w-full">
           <TreadDepthTable
             isEditable={isEditable}
@@ -631,6 +657,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(328)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(324)?.detail?.finalResponse}
@@ -639,6 +666,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(329)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(325)?.detail?.finalResponse}
@@ -647,6 +675,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(330)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(326)?.detail?.finalResponse}
@@ -655,6 +684,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
                 {matchById(331)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(327)?.detail?.finalResponse}
@@ -663,6 +693,7 @@ and are correct. Ensure that mudflaps are intact and secured to chassis.`}
             </tr>
           </TreadDepthTable>
         </div>
+
         <div className="w-full">
           <TreadDepthTable
             isEditable={isEditable}
@@ -680,6 +711,7 @@ Long or Short? (Circle)`}
                 {matchById(338)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(334)?.detail?.finalResponse}
@@ -688,6 +720,7 @@ Long or Short? (Circle)`}
                 {matchById(339)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(335)?.detail?.finalResponse}
@@ -696,6 +729,7 @@ Long or Short? (Circle)`}
                 {matchById(340)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(336)?.detail?.finalResponse}
@@ -704,6 +738,7 @@ Long or Short? (Circle)`}
                 {matchById(341)?.detail?.finalResponse}
               </td>
             </tr>
+
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(337)?.detail?.finalResponse}
@@ -715,6 +750,7 @@ Long or Short? (Circle)`}
           </TreadDepthTable>
         </div>
       </div>
+
       <div className="footer my-6 w-full">
         <div className="flex flex-col gap-3 w-full ">
           <div>
@@ -726,15 +762,15 @@ Long or Short? (Circle)`}
               Notes:
             </p>
           </div>
+
           <div className="w-full">
-            <textarea
-              name=""
-              className="w-full bg-black/3 p-2 rounded-lg text-base"
-              value={matchById(343)?.detail?.finalResponse}
-              id=""
-            ></textarea>
+            <EditableTextarea
+              isEditable={!!isEditable}
+              value={matchById(343)?.detail?.finalResponse ?? ""}
+            />
           </div>
         </div>
+
         <div className="flex flex-col md:flex-row items-center justify-between gap-10 w-full px-4">
           <div className="flex flex-row w-full md:w-1/2 gap-3 items-center justify-center">
             <div>
@@ -748,6 +784,7 @@ Long or Short? (Circle)`}
               />
             </div>
           </div>
+
           <div className="flex flex-row w-full md:w-1/2 gap-3 items-center justify-center">
             <div>
               <p className="!text-[13px] whitespace-nowrap ">
@@ -758,10 +795,12 @@ Long or Short? (Circle)`}
               <img
                 src={`${DOMAIN}${matchById(255)?.detail?.finalResponse}`}
                 className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
+                alt="Technician signature"
               />
             </div>
           </div>
         </div>
+
         <div className="flex items-center justify-between border-t-2 py-3 border-gray-400/20 w-full">
           <div className="text-gray-400">Document Ref. QMS-XXX-PRXX</div>
           <div className="text-gray-400">Revision No.:00</div>
@@ -799,7 +838,7 @@ const InputLine: React.FC<InputLineProps> = ({
         contentEditable={isEditable}
         suppressContentEditableWarning
       >
-        {value && value}
+        {value ?? ""}
       </span>
     </div>
   );
@@ -840,17 +879,13 @@ const TableSystemHead: FC<TableSystemHeadProps> = ({
 interface TableSystemBodyProps {
   label: string;
   enableBorderTop?: boolean;
-  checkPass?: boolean;
-  checkFail?: boolean;
-  checkRepair?: boolean;
+  pfr: PFR;
 }
 
 const TableSystemBody: FC<TableSystemBodyProps> = ({
   label,
   enableBorderTop = true,
-  checkFail = false,
-  checkPass = false,
-  checkRepair = false,
+  pfr,
 }) => {
   return (
     <tbody className={clsx("w-full", enableBorderTop && "border-t")}>
@@ -859,25 +894,13 @@ const TableSystemBody: FC<TableSystemBodyProps> = ({
           <span className="whitespace-normal">{label}</span>
         </td>
         <td className="p-2 text-center">
-          <input
-            type="checkbox"
-            className="checkbox"
-            defaultChecked={checkPass}
-          />
+          <ReadonlyCheckbox checked={pfr.pass} />
         </td>
         <td className="p-2 text-center border-l border-r">
-          <input
-            type="checkbox"
-            className="checkbox"
-            defaultChecked={checkFail}
-          />
+          <ReadonlyCheckbox checked={pfr.fail} />
         </td>
         <td className="p-2 text-center">
-          <input
-            type="checkbox"
-            className="checkbox"
-            defaultChecked={checkRepair}
-          />
+          <ReadonlyCheckbox checked={pfr.repair} />
         </td>
       </tr>
     </tbody>

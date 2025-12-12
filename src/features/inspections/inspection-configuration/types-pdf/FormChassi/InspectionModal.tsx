@@ -183,7 +183,7 @@ const InspectionModal: React.FC<Props> = ({
 
   return (
     <dialog open className="modal">
-      <div className="modal-box w-11/12 max-w-5xl">
+      <div className="modal-box w-11/12 max-w-5xl h-[75%]">
         <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">
             Select a group
