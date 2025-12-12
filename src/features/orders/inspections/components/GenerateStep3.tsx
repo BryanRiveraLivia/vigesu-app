@@ -228,15 +228,20 @@ const GenerateStep3 = () => {
                 const updated = toggleAnswer(selectedTree, answer, parentId);
                 setSelectedTree(updated);
 
-                const isRoot = !parentId;
-                if (
-                  isRoot &&
-                  (isSingle || isMultiple) &&
-                  updated.length === 1 &&
-                  isLastQuestionInGroup
-                ) {
-                  completeCurrentQuestion(updated[0].response);
-                }
+                // IMPORTANTE:
+                // No guardar ni avanzar automáticamente aquí.
+                // La confirmación debe ocurrir únicamente al presionar el botón Save/Continue
+                // y luego elegir la respuesta final en el popup.
+
+                /*  const isRoot = !parentId;
+  if (
+    isRoot &&
+    (isSingle || isMultiple) &&
+    updated.length === 1 &&
+    isLastQuestionInGroup
+  ) {
+    completeCurrentQuestion(updated[0].response);
+  } */
               }}
             >
               <div
