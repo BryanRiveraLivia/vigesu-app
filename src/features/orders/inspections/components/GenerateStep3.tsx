@@ -627,7 +627,7 @@ const GenerateStep3 = () => {
 
       {showRootPicker && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md relative">
+          <div className="bg-white p-6 rounded-xl w-[90%] max-w-md relative  h-[75%] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold ">{t("step3.3")}</h2>
               <button
