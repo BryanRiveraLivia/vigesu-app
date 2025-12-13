@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const apiKey = process.env.RESEND_API_KEY;
 
     if (!apiKey) {
-      console.error("❌ RESEND_API_KEY no está configurada");
+      console.error("❌ RESEND_API_KEY no está configurada x");
       return NextResponse.json(
         { error: "Email service not configured" },
         { status: 500 }
