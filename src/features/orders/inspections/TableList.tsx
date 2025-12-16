@@ -23,6 +23,8 @@ interface TableListProps {
   objFilter: { name: string };
 }
 
+const REALM_ID = "9341454759827689";
+
 const TableList = ({ objFilter }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const t = useTranslations("inspections");
@@ -64,6 +66,24 @@ const TableList = ({ objFilter }: TableListProps) => {
     }
   };
 
+  const getAxiosAuthHeader = () => {
+    const h =
+      (axiosInstance.defaults.headers as any)?.common?.Authorization ||
+      (axiosInstance.defaults.headers as any)?.Authorization ||
+      "";
+    return typeof h === "string" ? h : "";
+  };
+
+  const getErrorMessage = (err: any) => {
+    return (
+      err?.response?.data?.detail ||
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      String(err)
+    );
+  };
+
   // ==========================
   // 🔹 FETCH DATA (PAGINATION)
   // ==========================
@@ -87,54 +107,33 @@ const TableList = ({ objFilter }: TableListProps) => {
   };
 
   // ==========================
-  // 🔹 QUICKBOOKS SYNC
+  // 🔹 QUICKBOOKS SYNC (SERVER-SIDE PDF ATTACH)
   // ==========================
-  const sendWorkOrderPdfToQuickBooks = async (
-    quickBookEstimateId: string,
-    workOrderId: number
-  ) => {
-    const resp = await fetch(`/api/pdf/${workOrderId}?type=workorder`);
-    if (!resp.ok) throw new Error("No se pudo generar el PDF del WorkOrder");
+  const attachPdfToQuickBooks = async (params: {
+    quickBookEstimateId: string;
+    workOrderId: number; // aquí se usa para el id del pdf (workorder o inspection)
+    type: "workorder" | "liftgate";
+  }) => {
+    const auth = getAxiosAuthHeader();
 
-    const pdfBlob = await resp.blob();
-    const file = new File([pdfBlob], `WorkOrder-${workOrderId}.pdf`, {
-      type: "application/pdf",
+    const res = await fetch("/api/quickbooks/attach-estimate-pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(auth ? { Authorization: auth } : {}),
+      },
+      body: JSON.stringify({
+        quickBookEstimateId: params.quickBookEstimateId,
+        workOrderId: params.workOrderId,
+        type: params.type,
+        realmId: REALM_ID,
+      }),
     });
 
-    const formData = new FormData();
-    formData.append("QuickBookEstimateId", quickBookEstimateId);
-    formData.append("FilePdf", file);
-    formData.append("RealmId", "9341454759827689");
-
-    await axiosInstance.post(
-      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
-  };
-
-  const sendInspectionPdfToQuickBooks = async (
-    quickBookEstimateId: string,
-    inspectionId: number
-  ) => {
-    const resp = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
-    if (!resp.ok) throw new Error("No se pudo generar el PDF de la Inspección");
-
-    const pdfBlob = await resp.blob();
-    const file = new File([pdfBlob], `Inspection-${inspectionId}.pdf`, {
-      type: "application/pdf",
-    });
-
-    const formData = new FormData();
-    formData.append("QuickBookEstimateId", quickBookEstimateId);
-    formData.append("FilePdf", file);
-    formData.append("RealmId", "9341454759827689");
-
-    await axiosInstance.post(
-      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Adjuntar PDF falló (${res.status}): ${text}`);
+    }
   };
 
   const handleSyncWorkOrder = async (
@@ -142,13 +141,15 @@ const TableList = ({ objFilter }: TableListProps) => {
     syncOnlyEstimate = false
   ) => {
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
+
     try {
       // 1) Crear WorkOrder desde la inspección
       const { data: workOrderId } = await axiosInstance.post<number>(
         `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
         { inspectionId }
       );
-      if (typeof workOrderId !== "number") {
+
+      if (typeof workOrderId !== "number" || Number.isNaN(workOrderId)) {
         throw new Error("No se obtuvo un workOrderId válido.");
       }
 
@@ -157,13 +158,18 @@ const TableList = ({ objFilter }: TableListProps) => {
         "/QuickBooks/CreateEstimateFromWorkOrder",
         { workOrderId }
       );
+
       if (!quickBookEstimateId) {
         throw new Error("No se obtuvo un quickBookEstimateId válido.");
       }
 
-      // 3) Adjuntar PDF WorkOrder
+      // 3) Adjuntar PDF WorkOrder (server-side)
       if (!syncOnlyEstimate) {
-        await sendWorkOrderPdfToQuickBooks(quickBookEstimateId, workOrderId);
+        await attachPdfToQuickBooks({
+          quickBookEstimateId: String(quickBookEstimateId),
+          workOrderId,
+          type: "workorder",
+        });
       }
 
       // 4) Actualizar inspección con QuickBooks Estimate Id
@@ -176,24 +182,30 @@ const TableList = ({ objFilter }: TableListProps) => {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      // 5) Adjuntar PDF Inspección
+      // 5) Adjuntar PDF Inspección (server-side)
       if (!syncOnlyEstimate) {
-        await sendInspectionPdfToQuickBooks(quickBookEstimateId, inspectionId);
+        await attachPdfToQuickBooks({
+          quickBookEstimateId: String(quickBookEstimateId),
+          workOrderId: inspectionId, // el pdf route usa /api/pdf/[id]?type=liftgate
+          type: "liftgate",
+        });
       }
 
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "success" }));
+
       setTimeout(async () => {
         setSyncStatus((prev) => {
           const updated = { ...prev };
           delete updated[inspectionId];
           return updated;
         });
+
         await fetchData(currentPage);
         toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 800);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al sincronizar:", error);
-      toast.error(`${tToasts("error")}: ${tToasts("msj.22")}`);
+      toast.error(`${tToasts("error")}: ${getErrorMessage(error)}`);
       setSyncStatus((prev) => ({ ...prev, [inspectionId]: "idle" }));
     }
   };
@@ -226,6 +238,7 @@ const TableList = ({ objFilter }: TableListProps) => {
   // ==========================
   useEffect(() => {
     fetchData(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objFilter, currentPage, rowsPerPage]);
 
   useEffect(() => {
@@ -368,9 +381,7 @@ const TableList = ({ objFilter }: TableListProps) => {
           return (
             <button
               key={`page-${page}`}
-              className={`join-item btn ${
-                currentPage === page ? "btn-active" : ""
-              }`}
+              className={`join-item btn ${currentPage === page ? "btn-active" : ""}`}
               onClick={() => changePage(page)}
             >
               {page}
