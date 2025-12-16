@@ -5,11 +5,11 @@
   publish = ".next"
 
 [functions]
-node_bundler = "esbuild"
-external_node_modules = ["@sparticuz/chromium", "puppeteer-core"]
-included_files = [
-  "node_modules/@sparticuz/chromium/**"
-]
+  node_bundler = "esbuild"
+  external_node_modules = ["@sparticuz/chromium", "puppeteer-core"]
+  included_files = [
+    "node_modules/@sparticuz/chromium/**"
+  ]
 
 [build.environment]
   NODE_VERSION = "20"
@@ -19,7 +19,6 @@ included_files = [
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# 👇 Redirige la raíz a tu locale por defecto
 [[redirects]]
   from = "/"
   to = "/es"
