@@ -15,6 +15,8 @@ import Loading from "@/shared/components/shared/Loading";
 import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
 import { useTranslations } from "next-intl";
 
+const REALM_ID = "9341454759827689";
+
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const tGeneral = useTranslations("general");
@@ -36,6 +38,27 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const [loading, setLoading] = useState(true);
 
   // ==========================
+  // 🔹 HELPERS
+  // ==========================
+  const getAxiosAuthHeader = () => {
+    const h =
+      (axiosInstance.defaults.headers as any)?.common?.Authorization ||
+      (axiosInstance.defaults.headers as any)?.Authorization ||
+      "";
+    return typeof h === "string" ? h : "";
+  };
+
+  const getErrorMessage = (err: any) => {
+    return (
+      err?.response?.data?.detail ||
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      String(err)
+    );
+  };
+
+  // ==========================
   // 🔹 SYNCHRONIZATION LOGIC
   // ==========================
   const handleSyncWorkOrder = async (
@@ -43,7 +66,9 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     syncOnlyEstimate = false
   ) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
+
     try {
+      // 1) Crear estimate en backend
       const response = await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromWorkOrder",
         { workOrderId }
@@ -51,8 +76,13 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       const quickBookEstimatedId = response.data;
 
+      if (!quickBookEstimatedId) {
+        throw new Error("QuickBooks no devolvió un EstimateId válido.");
+      }
+
+      // 2) Adjuntar PDF (server-side via Next route)
       if (!syncOnlyEstimate) {
-        await sendPdfToQuickBooks(quickBookEstimatedId, workOrderId);
+        await sendPdfToQuickBooks(Number(quickBookEstimatedId), workOrderId);
       }
 
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
@@ -67,8 +97,9 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         await fetchData(currentPage);
         toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 1200);
-    } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+    } catch (err: any) {
+      console.error("Sync error:", err);
+      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
   };
@@ -77,34 +108,30 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     quickBookEstimatedId: number,
     workOrderId: number
   ) => {
-    try {
-      const response = await fetch(`/api/pdf/${workOrderId}`);
-      if (!response.ok) throw new Error("Error al generar el PDF");
+    // Este método YA NO envía multipart al backend directamente.
+    // Lo hace por /api/quickbooks/attach-estimate-pdf (server-side).
+    const auth = getAxiosAuthHeader();
 
-      const pdfBlob = await response.blob();
-      const file = new File(
-        [pdfBlob],
-        `WorkOrder-${quickBookEstimatedId}.pdf`,
-        {
-          type: "application/pdf",
-        }
-      );
+    const res = await fetch("/api/quickbooks/attach-estimate-pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(auth ? { Authorization: auth } : {}),
+      },
+      body: JSON.stringify({
+        quickBookEstimateId: String(quickBookEstimatedId),
+        workOrderId,
+        type: "workorder",
+        realmId: REALM_ID,
+      }),
+    });
 
-      const formData = new FormData();
-      formData.append("QuickBookEstimateId", String(quickBookEstimatedId));
-      formData.append("FilePdf", file);
-      formData.append("RealmId", "9341454759827689");
-
-      await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-        formData
-      );
-
-      toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
-    } catch (err) {
-      console.error(err);
-      toast.error(`${tToasts("error")}: ${err}`);
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Adjuntar PDF falló (${res.status}): ${text}`);
     }
+
+    toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
   };
 
   // ==========================
@@ -122,8 +149,8 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       setAllData(response.items ?? []);
       setTotalRecords(response.totalCount ?? 0);
-    } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+    } catch (err: any) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
     } finally {
       setLoading(false);
     }
@@ -136,12 +163,19 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     workOrderId: number,
     statusWorkOrder: number = WorkOrderStatus.Disabled
   ) => {
-    await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
-      workOrderId,
-      statusWorkOrder,
-    });
+    try {
+      await axiosInstance.put(
+        `/WorkOrder/UpdateWorkOrderState/${workOrderId}`,
+        {
+          workOrderId,
+          statusWorkOrder,
+        }
+      );
 
-    fetchData(currentPage);
+      fetchData(currentPage);
+    } catch (err: any) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
+    }
   };
 
   // ==========================
@@ -331,9 +365,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         {[...Array(totalPages)].map((_, idx) => (
           <button
             key={idx}
-            className={`join-item btn ${
-              currentPage === idx + 1 ? "btn-active" : ""
-            }`}
+            className={`join-item btn ${currentPage === idx + 1 ? "btn-active" : ""}`}
             onClick={() => changePage(idx + 1)}
           >
             {idx + 1}

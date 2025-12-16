@@ -355,17 +355,6 @@ const CreateOrder = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div role="alert" className="alert alert-info alert-soft mb-5 text-lg">
-        <span>{tAlerts("2")}</span>
-        <button
-          type="button"
-          className="!hidden"
-          onClick={() => router.push(`${pathname}`)}
-        >
-          Click me
-        </button>
-      </div>
-
       <div className=" border-[#00000014] border-1 p-2 mb-6 rounded-md flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div className="flex flex-row gap-2 items-center justify-center ">
