@@ -18,10 +18,22 @@ export async function POST(req: NextRequest) {
     const safeType = type || "workorder";
     const safeRealmId = realmId || "9341454759827689";
 
-    // 1) Generar PDF desde tu propio API usando el origin real del request
+    // ✅ Reenvía auth/cookies del request original
+    const auth = req.headers.get("authorization") || "";
+    const cookie = req.headers.get("cookie") || "";
+
     const origin = new URL(req.url).origin;
+
     const pdfResp = await fetch(
-      `${origin}/api/pdf/${workOrderId}?type=${safeType}`
+      `${origin}/api/pdf/${workOrderId}?type=${safeType}`,
+      {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          ...(auth ? { Authorization: auth } : {}),
+          ...(cookie ? { cookie } : {}),
+        },
+      }
     );
 
     if (!pdfResp.ok) {
@@ -46,8 +58,6 @@ export async function POST(req: NextRequest) {
     formData.append("RealmId", String(safeRealmId));
 
     // 3) Forward al backend real con Authorization (Bearer)
-    const auth = req.headers.get("authorization") || "";
-
     const qbResp = await fetch(
       `${API_CONFIG.BASE_URL}/QuickBooks/estimates/attachmentPDF?RealmId=${encodeURIComponent(
         safeRealmId
@@ -63,8 +73,6 @@ export async function POST(req: NextRequest) {
     );
 
     const text = await qbResp.text().catch(() => "");
-
-    // Devuelve tal cual para ver el error real si falla
     return new Response(text || "OK", { status: qbResp.status });
   } catch (err: any) {
     console.error("attach-estimate-pdf route error:", err);
