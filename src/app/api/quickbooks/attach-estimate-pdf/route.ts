@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
       )}`,
       {
         method: "POST",
+
+        cache: "no-store",
         body: formData,
         headers: {
           ...(auth ? { Authorization: auth } : {}),

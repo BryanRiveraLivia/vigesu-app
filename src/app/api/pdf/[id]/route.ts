@@ -1,7 +1,19 @@
-import puppeteer from "puppeteer";
 import { NextRequest } from "next/server";
 
+export const runtime = "nodejs";
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function isServerless() {
+  // Netlify
+  if (process.env.NETLIFY) return true;
+
+  // Otras plataformas serverless típicas (por si migras)
+  if (process.env.AWS_LAMBDA_FUNCTION_NAME) return true;
+  if (process.env.VERCEL) return true;
+
+  return false;
+}
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -25,23 +37,50 @@ export async function GET(req: NextRequest) {
       break;
   }
 
-  // ✅ Acepta cookies y/o Authorization reenviados desde attach-estimate-pdf
+  // ✅ auth/cookies para páginas protegidas
   const cookie = req.headers.get("cookie") || "";
   const auth = req.headers.get("authorization") || "";
 
-  let browser: any;
+  let browser: any = null;
 
   try {
-    // ✅ headless compatible (evita "new" si tu puppeteer no lo soporta)
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
+    // ==========================
+    // 1) Launch (local vs serverless)
+    // ==========================
+    if (isServerless()) {
+      // Netlify/serverless
+      const chromiumMod = await import("@sparticuz/chromium");
+      const chromium = (chromiumMod.default ?? chromiumMod) as any;
 
+      const puppeteerMod = await import("puppeteer-core");
+      const puppeteer = (puppeteerMod.default ?? puppeteerMod) as any;
+
+      const executablePath = await chromium.executablePath();
+
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        executablePath,
+        headless: chromium.headless,
+        defaultViewport: chromium.defaultViewport,
+      });
+    } else {
+      // Local (Windows/Mac/Linux dev)
+      const puppeteerMod = await import("puppeteer");
+      const puppeteer = (puppeteerMod.default ?? puppeteerMod) as any;
+
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+        ],
+      });
+    }
+
+    // ==========================
+    // 2) Render PDF (con reintentos)
+    // ==========================
     let lastErr: any = null;
 
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -68,8 +107,6 @@ export async function GET(req: NextRequest) {
           );
         }
 
-        // Si te redirige a login, aquí suele verse como 200 pero con otra URL.
-        // Dejamos el mensaje claro.
         const finalUrl = page.url();
         if (!resp.ok()) {
           throw new Error(
@@ -85,6 +122,7 @@ export async function GET(req: NextRequest) {
         });
 
         await page.close().catch(() => {});
+
         return new Response(Buffer.from(pdfBuffer), {
           headers: {
             "Content-Type": "application/pdf",
@@ -97,7 +135,7 @@ export async function GET(req: NextRequest) {
 
         await page.close().catch(() => {});
 
-        // reintento para frame detached
+        // Reintentos típicos en Next
         if (msg.includes("frame was detached") || msg.includes("detached")) {
           continue;
         }
