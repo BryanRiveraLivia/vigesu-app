@@ -24,6 +24,7 @@ import Loading from "@/shared/components/shared/Loading";
 import { toast } from "sonner";
 import { renameFileWithUniqueName } from "@/shared/utils/utils";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface WorkOrderDetail {
   observation?: string;
@@ -141,8 +142,12 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /* toast.error(`${tToasts("error")}: ${error}`);*/
       //console.error("Error buscando clientes:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingMechanic(false);
     }
@@ -181,8 +186,12 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /*toast.error(`${tToasts("error")}: ${error}`);*/
       //console.error("Error buscando empleados:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingMechanic(false);
     }
@@ -221,8 +230,12 @@ const EditOrder = () => {
       const response = await axiosInstance.get(url);
       setItemOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /*toast.error(`${tToasts("error")}: ${error}`);*/
       //console.error("Error buscando items:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingServiceParts(false);
     }
@@ -441,8 +454,12 @@ const EditOrder = () => {
             toast.success(`${tToasts("ok")}: ${tToasts("msj.19")}`);
           }
         } catch (error) {
-          toast.error(`${tToasts("error")}: ${error}`);
-          console.error(error);
+          /*toast.error(`${tToasts("error")}: ${error}`);
+          console.error(error);*/
+          const msg = formatApiErrorForToast(error);
+          toast.error(msg, {
+            style: { whiteSpace: "pre-line" },
+          });
         }
       }
 
@@ -479,7 +496,11 @@ const EditOrder = () => {
 
       //router.push(parentPath);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /*toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

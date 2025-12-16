@@ -20,6 +20,7 @@ import {
   InspectionStatusLabel,
 } from "../models/typeInspection";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -97,7 +98,11 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      /*console.error("Error buscando clientes:", error);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -209,7 +214,11 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.5")}`);
       router.push(parentPath);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      //toast.error(`${tToasts("error")}: ${error}`);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

@@ -6,6 +6,8 @@ import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { StatusEnum } from "@/features/inspections/models/GroupTypes";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { toast } from "sonner";
 
 interface GroupModalProps {
   onClose: () => void;
@@ -44,8 +46,12 @@ const GroupModal: React.FC<GroupModalProps> = ({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Error al guardar grupo", error);
-      alert("Hubo un error al guardar el grupo");
+      /*console.error("Error al guardar grupo", error);
+      alert("Hubo un error al guardar el grupo");*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }

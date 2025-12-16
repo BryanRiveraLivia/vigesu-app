@@ -7,6 +7,8 @@ import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { UserStatusLabel } from "../../models/UsersTypes";
 import SignaturePad, { SignaturePadRef } from "../SignaturePad";
 import { useRef } from "react";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { toast } from "sonner";
 
 interface UserModalProps {
   onClose: () => void;
@@ -77,8 +79,12 @@ const UserModal: React.FC<UserModalProps> = ({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error("Error al guardar usuario", error);
-      alert("Hubo un error al guardar el usuario");
+      /*console.error("Error al guardar usuario", error);
+      alert("Hubo un error al guardar el usuario");*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { renameFileWithUniqueName } from "@/shared/utils/utils";
 import Loading from "@/shared/components/shared/Loading";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const workItemSchema = z.object({
   description: z.string().optional(),
@@ -120,7 +121,11 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /* toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -159,8 +164,12 @@ const CreateOrder = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+      /*toast.error(`${tToasts("error")}: ${error}`);*/
       //console.error("Error buscando empleados:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingMechanic(false);
     }
@@ -201,7 +210,11 @@ const CreateOrder = () => {
     } catch (error) {
       //console.error("Error buscando items:", error);
 
-      toast.error(`${tToasts("error")}: ${error}`);
+      /*toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingServiceParts(false);
     }
@@ -317,7 +330,11 @@ const CreateOrder = () => {
     } catch (error) {
       //console.error("❌ Error al procesar el formulario", error);
 
-      toast.error(`${tToasts("error")}: ${error}`);
+      //toast.error(`${tToasts("error")}: ${error}`);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

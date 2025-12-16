@@ -13,6 +13,7 @@ import { DOMAIN } from "@/config/constants";
 import debounce from "lodash/debounce";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -117,8 +118,12 @@ const EditOrder = () => {
           setSignaturePreview(`${data.signatureImagePath}`);
         }
       } catch (error) {
-        console.error("Error al cargar usuario:", error);
-        toast.error(`${tToasts("error")}: ${error}`);
+        /*console.error("Error al cargar usuario:", error);
+        toast.error(`${tToasts("error")}: ${error}`);*/
+        const msg = formatApiErrorForToast(error);
+        toast.error(msg, {
+          style: { whiteSpace: "pre-line" },
+        });
       } finally {
         setLoading(false);
       }
@@ -162,8 +167,12 @@ const EditOrder = () => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.13")}`);
       router.push("../"); // vuelve al listado de usuarios de este módulo
     } catch (error) {
-      console.error("PUT user error", error);
-      toast.error(`${tToasts("error")}: ${error}`);
+      /* console.error("PUT user error", error);
+      toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setSaving(false);
     }

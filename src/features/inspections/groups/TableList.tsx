@@ -9,6 +9,8 @@ import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
 import { FaRegEdit } from "react-icons/fa";
 import GroupModal from "./create/GroupModal";
 import Loading from "@/shared/components/shared/Loading";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { toast } from "sonner";
 
 // Estructura que devuelve tu API de Group
 interface GetGroupsResponse {
@@ -76,7 +78,11 @@ const TableList = ({
       setAllData(data.items ?? []);
       setTotalRecords(data.totalCount ?? data.items?.length ?? 0);
     } catch (error) {
-      console.error("Error al cargar grupos", error);
+      //console.error("Error al cargar grupos", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
       setAllData([]);
       setTotalRecords(0);
     } finally {

@@ -19,6 +19,7 @@ import { generatePDF } from "@/shared/utils/generatePDF";
 import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const GeneratePdfPage = () => {
   const tToasts = useTranslations("toast");
@@ -73,7 +74,11 @@ const GeneratePdfPage = () => {
           setInspectionData(resInspection.value.data);
         }
       } catch (error) {
-        toast.error(`${tToasts("error")}: ${error}`);
+        //toast.error(`${tToasts("error")}: ${error}`);
+        const msg = formatApiErrorForToast(error);
+        toast.error(msg, {
+          style: { whiteSpace: "pre-line" },
+        });
       }
     };
 

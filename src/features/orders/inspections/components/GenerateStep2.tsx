@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const GenerateStep2 = () => {
   const t = useTranslations("inspections");
@@ -82,8 +83,12 @@ const GenerateStep2 = () => {
 
       router.push("./");
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
-      console.error(error);
+      /* toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
+      console.error(error);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

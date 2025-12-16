@@ -14,6 +14,7 @@ import { useAuthStore } from "@/shared/stores/useAuthStore";
 import { setCookie } from "cookies-next";
 import { toast } from "sonner";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const STATUS_QB_WAITING = "waiting" as const;
 const STATUS_QB_IDLE = "idle" as const;
@@ -106,8 +107,12 @@ export default function Home() {
       setQbStatus(STATUS_QB_WAITING);
       setQbPolling(true);
     } catch (error) {
-      console.error("QuickBooks connect/access-token error:", error);
-      toast.error("Error al conectar/verificar QuickBooks.");
+      /*console.error("QuickBooks connect/access-token error:", error);
+      toast.error("Error al conectar/verificar QuickBooks.");*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
       setQbStatus(STATUS_QB_ERROR);
       setQbErrorMessage("Error al conectar o verificar QuickBooks.");
     }
@@ -151,7 +156,11 @@ export default function Home() {
           toast.error("Inicio de sesión fallido por token.");
         }
       } catch (error) {
-        console.error("QuickBooks access-token error:", error);
+        /*console.error("QuickBooks access-token error:", error);*/
+        const msg = formatApiErrorForToast(error);
+        toast.error(msg, {
+          style: { whiteSpace: "pre-line" },
+        });
         window.clearInterval(intervalId);
         setQbPolling(false);
         setQbStatus(STATUS_QB_ERROR);

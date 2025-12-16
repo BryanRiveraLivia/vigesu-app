@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { slugify } from "@/shared/utils/utils";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
   const router = useRouter();
@@ -30,8 +31,12 @@ const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
       setAllData(data.items);
       setTotalPages(data.totalPages);
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.32")}`);
-      console.error(error);
+      /* toast.error(`${tToasts("error")}: ${tToasts("msj.32")}`);
+      console.error(error);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import { formatDate } from "@/shared/utils/utils";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface Props {
   data: WorkOrder;
@@ -44,8 +45,12 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
         console.log("match:", match);
         setGetItem(items);
       } catch (error) {
-        console.error("Error fetching template data:", error);
-        toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
+        /* console.error("Error fetching template data:", error);
+        toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);*/
+        const msg = formatApiErrorForToast(error);
+        toast.error(msg, {
+          style: { whiteSpace: "pre-line" },
+        });
         return [];
       }
     };

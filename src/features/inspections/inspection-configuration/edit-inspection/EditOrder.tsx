@@ -25,6 +25,7 @@ import { useParams, useRouter } from "next/navigation";
 import { InspectionStatusLabel } from "../models/typeInspection";
 import { MdEdit } from "react-icons/md";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 // --------- Estados backend ----------
 const STATUS_ACTIVE = 0 as const;
@@ -262,7 +263,11 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      //console.error("Error buscando clientes:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -435,8 +440,12 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.33")}`);
       router.push("../");
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
-      console.error(error);
+      /*toast.error(`${tToasts("error")}: ${error}`);
+      console.error(error);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

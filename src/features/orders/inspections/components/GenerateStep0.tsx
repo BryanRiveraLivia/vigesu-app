@@ -24,6 +24,8 @@ import GenerateStep2 from "./GenerateStep2";
 import GenerateStep3 from "./GenerateStep3";
 import GenerateStep4 from "./GenerateStep4";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { toast } from "sonner";
 
 const GenerateStep0 = () => {
   const t = useTranslations("inspections");
@@ -66,8 +68,12 @@ const GenerateStep0 = () => {
           setCustomerOptions(filtered);
           setShowCustomerDropdown(true);
         } catch (error) {
-          console.error("Error buscando clientes:", error);
+          /* console.error("Error buscando clientes:", error);*/
           setCustomerOptions([]);
+          const msg = formatApiErrorForToast(error);
+          toast.error(msg, {
+            style: { whiteSpace: "pre-line" },
+          });
         } finally {
           setIsLoadingCustomer(false);
         }

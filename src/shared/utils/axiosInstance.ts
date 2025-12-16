@@ -12,7 +12,6 @@ export const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
 //  Agrega el token a cada request si existe
 axiosInstance.interceptors.request.use((config) => {
   const token = getCookie("auth-token");

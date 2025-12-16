@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import Loading from "@/shared/components/shared/Loading";
 import { useTranslations } from "next-intl";
 import CaliforniaBitInspection from "@/shared/components/shared/InspectionsPdf/CaliforniaBitInspection";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface CustomerOption {
   id: number;
@@ -77,7 +78,11 @@ const Page = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      //console.error("Error buscando clientes:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -102,7 +107,11 @@ const Page = () => {
       const response = await axiosInstance.get(url);
       setMechanicOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando empleados:", error);
+      //console.error("Error buscando empleados:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setIsLoadingMechanic(false);
     }

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
 import Loading from "@/shared/components/shared/Loading";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 // Opcional si alguna vez quieres precargar algo del usuario logueado
 // import { useAuthStore } from "@/shared/stores/useAuthStore";
 
@@ -156,8 +157,12 @@ const CreateOrder = () => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.10")}`);
       router.push("./");
     } catch (error) {
-      console.error(error);
-      toast.error(`${tToasts("error")}: ${String(error)}`);
+      /*console.error(error);
+      toast.error(`${tToasts("error")}: ${String(error)}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

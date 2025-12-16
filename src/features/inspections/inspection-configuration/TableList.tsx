@@ -14,6 +14,7 @@ import Loading from "@/shared/components/shared/Loading";
 import { usePathname, useRouter } from "next/navigation";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const tToasts = useTranslations("toast");
@@ -54,8 +55,12 @@ const TableList = ({ objFilter }: TableListProps) => {
       setAllData(mappedItems);
       setTotalCount(total ?? mappedItems.length);
     } catch (error) {
-      console.error(error);
-      toast.error(`${tToasts("error")}: ${error}`);
+      /* console.error(error);
+      toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }
@@ -81,8 +86,12 @@ const TableList = ({ objFilter }: TableListProps) => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.4")}`);
       await fetchData(currentPage);
     } catch (error) {
-      console.error(error);
-      toast.error(`${tToasts("error")}: ${error}`);
+      /* console.error(error);
+      toast.error(`${tToasts("error")}: ${error}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }

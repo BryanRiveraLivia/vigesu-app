@@ -18,6 +18,7 @@ import {
 import clsx from "clsx";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface TableListProps {
   objFilter: { name: string };
@@ -99,8 +100,12 @@ const TableList = ({ objFilter }: TableListProps) => {
       setAllData(items ?? []);
       setTotalCount(total ?? 0);
     } catch (error) {
-      console.error(error);
-      toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);
+      /* console.error(error);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     } finally {
       setLoading(false);
     }
@@ -228,8 +233,12 @@ const TableList = ({ objFilter }: TableListProps) => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.23")}`);
       fetchData(currentPage);
     } catch (error) {
-      console.error(error);
-      toast.error(`${tToasts("error")}: ${tToasts("msj.24")}`);
+      /* console.error(error);
+      toast.error(`${tToasts("error")}: ${tToasts("msj.24")}`);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

@@ -31,6 +31,7 @@ import ImageUploader from "../../create-order/ImageUploader";
 import { useAuthUser } from "@/shared/stores/useAuthUser";
 import EmailConfirmationModal from "./EmailConfirmationModal";
 import { useTranslations } from "next-intl";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 interface GenerateStep1Props {
   ClientName: string;
@@ -177,8 +178,12 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       useInspectionFullStore.getState().resetFullInspection();
       router.push("./");
     } catch (error) {
-      toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
-      console.error(error);
+      /*toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
+      console.error(error);*/
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 

@@ -2,8 +2,10 @@ import { DOMAIN } from "@/config/constants";
 import Loading from "@/shared/components/shared/Loading";
 import { useAuthStore } from "@/shared/stores/useAuthStore";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface AnswerSign {
   employeeId: string;
@@ -35,7 +37,11 @@ const AnswerSign = ({ onComplete }: Props) => {
         const data = res.data;
         setDataUser(data);
       } catch (error) {
-        console.error("Error al cargar usuario:", error);
+        /*console.error("Error al cargar usuario:", error);*/
+        const msg = formatApiErrorForToast(error);
+        toast.error(msg, {
+          style: { whiteSpace: "pre-line" },
+        });
       } finally {
         setLoading(false);
       }

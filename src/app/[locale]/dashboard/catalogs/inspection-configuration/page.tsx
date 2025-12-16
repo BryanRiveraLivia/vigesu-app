@@ -5,6 +5,7 @@ import { WorkOrderStatusLabel } from "@/features/orders/models/workOrder.types";
 import BackButton from "@/shared/components/shared/BackButton";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { formatApiErrorForToast } from "@/shared/utils/errors";
 import { CustomerOption } from "@/shared/utils/orderMapper";
 import { debounce } from "lodash";
 import { useTranslations } from "next-intl";
@@ -14,6 +15,7 @@ import React, { useRef, useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
+import { toast } from "sonner";
 
 const Page = () => {
   const pathname = usePathname();
@@ -65,7 +67,11 @@ const Page = () => {
       const response = await axiosInstance.get(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      console.error("Error buscando clientes:", error);
+      //console.error("Error buscando clientes:", error);
+      const msg = formatApiErrorForToast(error);
+      toast.error(msg, {
+        style: { whiteSpace: "pre-line" },
+      });
     }
   };
 
