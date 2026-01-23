@@ -8,6 +8,7 @@ import ChassisAnnualInspectionReportDayPM from "./ChassisAnnualInspectionReportD
 import PremierFHWA from "./PremierFHWA";
 import MckinneyFederalInspection from "./MckinneyFederalInspection";
 import InspectionTTN from "./InspectionTTN";
+import CaliforniaBitInspection from "./CaliforniaBitInspection";
 
 interface RenderProps {
   data: LiftgateInspection;
@@ -23,20 +24,6 @@ const RenderComponentByNumber = (
     {
       1: ({ data, inspectionDetails, isEditable }) => (
         <MckinneyFederalInspection
-          data={data}
-          inspectionDetails={inspectionDetails}
-          isEditable={isEditable}
-        />
-      ),
-      7: ({ data, inspectionDetails, isEditable }) => (
-        <LiftgateInspectionCheckList
-          data={data}
-          inspectionDetails={inspectionDetails}
-          isEditable={isEditable}
-        />
-      ),
-      5: ({ data, inspectionDetails, isEditable }) => (
-        <PremierFHWA
           data={data}
           inspectionDetails={inspectionDetails}
           isEditable={isEditable}
@@ -58,6 +45,27 @@ const RenderComponentByNumber = (
       ),
       4: ({ data, inspectionDetails, isEditable }) => (
         <InspectionTTN
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      5: ({ data, inspectionDetails, isEditable }) => (
+        <PremierFHWA
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      6: ({ data, inspectionDetails, isEditable }) => (
+        <LiftgateInspectionCheckList
+          data={data}
+          inspectionDetails={inspectionDetails}
+          isEditable={isEditable}
+        />
+      ),
+      7: ({ data, inspectionDetails, isEditable }) => (
+        <CaliforniaBitInspection
           data={data}
           inspectionDetails={inspectionDetails}
           isEditable={isEditable}
