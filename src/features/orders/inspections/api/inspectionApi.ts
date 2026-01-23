@@ -44,9 +44,9 @@ export interface TemplateInspectionResponse {
 
 export const getTemplateInspections = async (
   page: number,
-  name: string
+  name: string,
 ): Promise<TemplateInspectionResponse> => {
-  const res = await axiosInstance.get("/TemplateInspection", {
+  const res = await axiosInstance.get("/TemplateInspection?pageSize=100", {
     params: {
       PageNumber: page,
       Name: name,
