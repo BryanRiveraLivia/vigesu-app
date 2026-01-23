@@ -44,7 +44,7 @@ const Page = () => {
         setError(null);
 
         const { data } = await axiosInstance.get<TemplateInspectionResponse>(
-          "/TemplateInspection"
+          "/TemplateInspection?pageSize=100",
         );
 
         if (!isMounted) return;
@@ -64,9 +64,8 @@ const Page = () => {
 
   const match = useMemo(
     () => items.find((it) => it.templateInspectionId === id),
-    [items, id]
+    [items, id],
   );
-
   const pdfUrl = useMemo(() => {
     if (!match?.filePath) return null;
 
