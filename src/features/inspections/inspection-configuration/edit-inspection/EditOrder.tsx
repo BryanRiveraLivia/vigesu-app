@@ -93,7 +93,7 @@ const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
       out.push({
         ...a,
         subTypeInspectionDetailAnswers: dedupeAnswers(
-          a.subTypeInspectionDetailAnswers ?? []
+          a.subTypeInspectionDetailAnswers ?? [],
         ),
       });
     }
@@ -125,7 +125,7 @@ const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
     usingItem: !!a.usingItem,
     isPrintable: a.isPrintable ?? true,
     subTypeInspectionDetailAnswers: Array.isArray(
-      a.subTypeInspectionDetailAnswers
+      a.subTypeInspectionDetailAnswers,
     )
       ? a.subTypeInspectionDetailAnswers.map(mapAnswerFromApi)
       : [],
@@ -158,7 +158,7 @@ const toApiAnswers = (answers: ExportedAnswer[] = []): ApiAnswer[] =>
       usingItem: !!ans?.usingItem,
       isPrintable: ans?.isPrintable ?? true,
       subTypeInspectionDetailAnswers: toApiAnswers(
-        ans?.subTypeInspectionDetailAnswers ?? []
+        ans?.subTypeInspectionDetailAnswers ?? [],
       ),
     };
   });
@@ -206,7 +206,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
-    []
+    [],
   );
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
 
@@ -281,7 +281,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
         } else {
           setCustomerOptions([]);
         }
-      }, 500)
+      }, 500),
     ).current;
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,7 +304,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
     const res = await axiosInstance.get<CustomerIdRes>(
-      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`,
     );
     return res.data?.name ?? "";
   };
@@ -317,9 +317,9 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     const fetchInitialData = async () => {
       try {
         const [templateRes, inspectionRes] = await Promise.all([
-          axiosInstance.get<TemplateRes>("/TemplateInspection"),
+          axiosInstance.get<TemplateRes>("/TemplateInspection?pageSize=100"),
           axiosInstance.get<TypeInspectionGetResponse>(
-            `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`
+            `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`,
           ),
         ]);
 
@@ -328,7 +328,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           items.map((t) => ({
             id: t.templateInspectionId,
             name: t.name,
-          }))
+          })),
         );
 
         const data = inspectionRes.data;
@@ -367,7 +367,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               ? STATUS_DELETED
               : STATUS_ACTIVE,
           typeInspectionDetailAnswers: dedupeAnswers(
-            (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi)
+            (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi),
           ),
         }));
 
@@ -375,13 +375,13 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           initialQuestionsRef.current = mappedQuestions;
           latestQuestionsRef.current = mappedQuestions; // seed ref
           setHasAtLeastOneQuestion(
-            mappedQuestions.some((qq) => qq.status !== STATUS_DELETED)
+            mappedQuestions.some((qq) => qq.status !== STATUS_DELETED),
           );
         } else {
           setHasAtLeastOneQuestion(
             (latestQuestionsRef.current ?? []).some(
-              (qq) => qq.status !== STATUS_DELETED
-            )
+              (qq) => qq.status !== STATUS_DELETED,
+            ),
           );
         }
       } catch (err) {
@@ -541,7 +541,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               />
             </div>
             <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-              <span className={labelClass()}>Theme</span>
+              <span className={labelClass()}>Themex</span>
               <select
                 defaultValue=""
                 disabled
