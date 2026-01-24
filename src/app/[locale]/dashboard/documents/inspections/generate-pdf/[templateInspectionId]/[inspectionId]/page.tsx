@@ -24,10 +24,10 @@ const GeneratePdfPage = () => {
   const tToasts = useTranslations("toast");
   const [isEditable, setIsEditable] = useState<boolean>(false);
   const [templateData, setTemplateData] = useState<LiftgateInspection | null>(
-    null
+    null,
   );
   const [inspectionData, setInspectionData] = useState<IInspection | null>(
-    null
+    null,
   );
 
   const params = useParams();
@@ -56,10 +56,10 @@ const GeneratePdfPage = () => {
       try {
         const [resTemplate, resInspection] = await Promise.allSettled([
           axiosInstance.get(
-            `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`
+            `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`,
           ),
           axiosInstance.get(
-            `/Inspection/GetInspectionById?InspectionId=${inspectionId}`
+            `/Inspection/GetInspectionById?InspectionId=${inspectionId}`,
           ),
         ]);
 
@@ -112,7 +112,7 @@ const GeneratePdfPage = () => {
             onClick={() =>
               generatePDF(
                 "pdf-content",
-                `Inspection - ${templateData.name}.pdf`
+                `Inspection - ${templateData.name}.pdf`,
               )
             }
           />

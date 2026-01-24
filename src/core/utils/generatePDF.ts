@@ -19,24 +19,36 @@ export const generatePDF = async (
 
     // ✅ Clonamos el nodo para capturar TODO el contenido sin recorte
     const clone = element.cloneNode(true) as HTMLElement;
+
+    // ✅ Forzamos un ancho de 800px para que el escalado a A4 sea natural
+    // (A4 es ~794px a 96dpi, 800px es el estándar ideal para formularios)
+    clone.style.width = "800px";
+    clone.style.minWidth = "800px";
+    clone.style.maxWidth = "800px";
     clone.style.height = "auto";
     clone.style.maxHeight = "none";
     clone.style.overflow = "visible";
     clone.style.position = "absolute";
     clone.style.left = "-9999px";
     clone.style.top = "0";
+    clone.style.backgroundColor = "white"; // Aseguramos fondo blanco
+
     document.body.appendChild(clone);
 
-    // ✅ Capturamos imagen completa
+    // ✅ Pequeña espera para asegurar que las imágenes se rendericen
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // ✅ Capturamos imagen con alta escala para nitidez
     const canvas = await html2canvas(clone, {
-      scale: 2,
+      scale: 3, // Incrementamos escala para mayor nitidez
       useCORS: true,
       allowTaint: true,
-      windowWidth: clone.scrollWidth,
-      windowHeight: clone.scrollHeight,
+      logging: false,
+      backgroundColor: "#ffffff",
+      windowWidth: 800,
     });
 
-    const imgData = canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/jpeg", 0.95); // Usamos JPEG para reducir peso si es muy grande
 
     // ✅ Crear PDF
     const pdf = new jsPDF({
@@ -48,16 +60,21 @@ export const generatePDF = async (
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
+    // El ancho de la imagen en el PDF será el ancho total del PDF
     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
     if (imgHeight <= pdfHeight) {
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight);
     } else {
       let y = 0;
+      // Definimos el alto de corte basado en la proporción de la página
+      const pageHeightInCanvas = (canvas.width * pdfHeight) / pdfWidth;
+
       while (y < canvas.height) {
         const pageCanvas = document.createElement("canvas");
         pageCanvas.width = canvas.width;
-        pageCanvas.height = Math.min(canvas.height - y, canvas.width * 1.414);
+        pageCanvas.height = Math.min(canvas.height - y, pageHeightInCanvas);
+
         const ctx = pageCanvas.getContext("2d");
         ctx?.drawImage(
           canvas,
@@ -70,15 +87,17 @@ export const generatePDF = async (
           canvas.width,
           pageCanvas.height,
         );
-        const pageData = pageCanvas.toDataURL("image/png");
+
+        const pageData = pageCanvas.toDataURL("image/jpeg", 0.95);
         pdf.addImage(
           pageData,
-          "PNG",
+          "JPEG",
           0,
           0,
           pdfWidth,
           (pageCanvas.height * pdfWidth) / pageCanvas.width,
         );
+
         y += pageCanvas.height;
         if (y < canvas.height) pdf.addPage();
       }

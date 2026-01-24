@@ -136,7 +136,7 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
 
   const matchById = useMemo(
     () => buildQuestionMatcherGeneric(data, inspectionDetails),
-    [data, inspectionDetails]
+    [data, inspectionDetails],
   );
 
   return (
@@ -165,13 +165,11 @@ const ChassisAnnualInspectionReportDayPM: React.FC<PropsPDF> = ({
             </div>
           </div>
           <div className=" min-w-[180px] items-center justify-center flex  h-full">
-            <Image
-              src={logo}
+            <img
+              src={logo.src}
               alt="QMS FORM Logo"
               className="object-contain object-center min-w-[70%] !h-[50px]"
-              width={150}
-              height={60}
-              priority
+              style={{ width: "150px", height: "60px" }}
             />
           </div>
         </div>
@@ -819,11 +817,13 @@ Long or Short? (Circle)`}
               </p>
             </div>
             <div className="w-full">
-              <img
-                src={`${DOMAIN}${matchById(255)?.detail?.finalResponse}`}
-                className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
-                alt="Technician signature"
-              />
+              {matchById(255)?.detail?.finalResponse && (
+                <img
+                  src={`${DOMAIN}${matchById(255)?.detail?.finalResponse}`}
+                  className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
+                  alt="Technician signature"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -850,7 +850,7 @@ const InputLine: React.FC<InputLineProps> = ({
     <div
       className={clsx(
         `flex flex-row  items-start justify-start gap-2 uppercase`,
-        className
+        className,
       )}
     >
       <label
@@ -890,7 +890,7 @@ const TableSystemHead: FC<TableSystemHeadProps> = ({
     <thead
       className={clsx(
         "w-full bg-black/5 border-b ",
-        enableBorderTop && "border-t"
+        enableBorderTop && "border-t",
       )}
     >
       <tr className="h-[47px]">

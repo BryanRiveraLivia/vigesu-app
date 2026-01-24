@@ -28,7 +28,7 @@ const ChassisAnnualInspectionReport: React.FC<PropsPDF> = ({
   console.log("details", inspectionDetails);
   const matchById = useMemo(
     () => buildQuestionMatcherGeneric(data, inspectionDetails),
-    [data, inspectionDetails]
+    [data, inspectionDetails],
   );
   //console.log("matchById", summarizeDetail(matchById(473)?.detail));
 
@@ -68,13 +68,11 @@ const ChassisAnnualInspectionReport: React.FC<PropsPDF> = ({
             </div>
           </div>
           <div className=" min-w-[180px] items-center justify-center flex  h-full">
-            <Image
-              src={logo}
+            <img
+              src={logo.src}
               alt="QMS FORM Logo"
               className="object-contain object-center min-w-[70%] !h-[50px]"
-              width={150} // 🔹 Ajusta el tamaño
-              height={60} // 🔹 Ajusta el tamaño
-              priority // 🔹 Optimiza carga inicial (LCP)
+              style={{ width: "150px", height: "60px" }}
             />
           </div>
         </div>
@@ -1741,10 +1739,12 @@ Long or Short? (Circle)`}
               </p>
             </div>
             <div className="w-full">
-              <img
-                src={`${DOMAIN}${matchById(255)?.detail?.finalResponse}`}
-                className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
-              />
+              {matchById(255)?.detail?.finalResponse && (
+                <img
+                  src={`${DOMAIN}${matchById(255)?.detail?.finalResponse}`}
+                  className="max-w-full mx-auto object-contain h-12 mb-3 border-b-1 border-solid border-l-0 border-r-0 border-t-0 w-full"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -1770,7 +1770,7 @@ const InputLine: React.FC<InputLineProps> = ({
     <div
       className={clsx(
         `flex flex-row  items-start justify-start gap-2 uppercase`,
-        className
+        className,
       )}
     >
       <label

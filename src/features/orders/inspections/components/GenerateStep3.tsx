@@ -78,7 +78,7 @@ const GenerateStep3 = () => {
 
   const getAnswerFromTree = (
     tree: IFullAnswer[],
-    id: string
+    id: string,
   ): IFullAnswer | undefined => {
     for (const a of tree) {
       if (String(a.typeInspectionDetailAnswerId) === id) return a;
@@ -96,14 +96,14 @@ const GenerateStep3 = () => {
     return node.subAnswers.some(
       (sub) =>
         isSelected(String(sub.typeInspectionDetailAnswerId), selectedTree) ||
-        hasSelectedDescendant(sub)
+        hasSelectedDescendant(sub),
     );
   };
 
   const updateSelectedItems = (
     tree: IFullAnswer[],
     answerId: string,
-    items: ItemWithQuantity[]
+    items: ItemWithQuantity[],
   ): IFullAnswer[] =>
     tree.map((a) => {
       if (String(a.typeInspectionDetailAnswerId) === answerId) {
@@ -122,7 +122,7 @@ const GenerateStep3 = () => {
   const toggleAnswer = (
     tree: IFullAnswer[],
     answer: IFullAnswer,
-    parentId?: string
+    parentId?: string,
   ): IFullAnswer[] => {
     const isRoot = !parentId;
 
@@ -151,14 +151,14 @@ const GenerateStep3 = () => {
         const exists = tree.find(
           (a) =>
             a.typeInspectionDetailAnswerId ===
-            answer.typeInspectionDetailAnswerId
+            answer.typeInspectionDetailAnswerId,
         );
         if (exists) {
           // Quitar raíz (y su árbol)
           return tree.filter(
             (a) =>
               a.typeInspectionDetailAnswerId !==
-              answer.typeInspectionDetailAnswerId
+              answer.typeInspectionDetailAnswerId,
           );
         } else {
           // Forzamos una sola raíz
@@ -170,13 +170,13 @@ const GenerateStep3 = () => {
           const exists = node.subAnswers?.some(
             (sub) =>
               sub.typeInspectionDetailAnswerId ===
-              answer.typeInspectionDetailAnswerId
+              answer.typeInspectionDetailAnswerId,
           );
           const newSubs = exists
             ? node.subAnswers!.filter(
                 (sub) =>
                   sub.typeInspectionDetailAnswerId !==
-                  answer.typeInspectionDetailAnswerId
+                  answer.typeInspectionDetailAnswerId,
               )
             : [...(node.subAnswers ?? []), { ...answer, subAnswers: [] }];
           return { ...node, subAnswers: newSubs };
@@ -197,7 +197,7 @@ const GenerateStep3 = () => {
   const renderAnswerRecursive = (
     answer: IFullAnswer,
     level: number = 0,
-    parentId?: string
+    parentId?: string,
   ): React.ReactNode => {
     const backgroundColor =
       answer.color === "#ffffff" ? "#171717" : answer.color;
@@ -250,7 +250,7 @@ const GenerateStep3 = () => {
                 className={clsx(
                   !answer.usingItem
                     ? "overflow-hidden rounded-tl-full rounded-full px-5 flex flex-row transition-all group-hover:shadow-lg"
-                    : "overflow-hidden rounded-tl-full rounded-bl-full px-5 flex flex-row transition-all group-hover:shadow-lg"
+                    : "overflow-hidden rounded-tl-full rounded-bl-full px-5 flex flex-row transition-all group-hover:shadow-lg",
                 )}
               >
                 <div className="h-[45px] flex items-center justify-center pr-4">
@@ -262,7 +262,7 @@ const GenerateStep3 = () => {
                     className={clsx(
                       isMultiple
                         ? "checkbox bg-white checked:bg-white checked:text-green-600 checked:border-green-500"
-                        : "radio bg-white checked:bg-white checked:text-green-600 checked:border-green-500"
+                        : "radio bg-white checked:bg-white checked:text-green-600 checked:border-green-500",
                     )}
                   />
                 </div>
@@ -280,7 +280,7 @@ const GenerateStep3 = () => {
                     openItemModal(answer);
                   }}
                   className={clsx(
-                    "h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px] overflow-hidden bg-[#35353382]"
+                    "h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px] overflow-hidden bg-[#35353382]",
                   )}
                 >
                   <GoChecklist className="size-7 text-black/50 transition-all hover:text-black" />
@@ -292,7 +292,7 @@ const GenerateStep3 = () => {
                     openItemModal(answer);
                   }}
                   className={clsx(
-                    "h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px] overflow-hidden bg-green-300"
+                    "h-full cursor-pointer flex items-center rounded-tr-full rounded-br-full justify-center px-3 min-w-[45px] overflow-hidden bg-green-300",
                   )}
                 >
                   <Lottie
@@ -371,7 +371,7 @@ const GenerateStep3 = () => {
     const updatedQuestions = current.questions.map((q) =>
       q.typeInspectionDetailId === fq.typeInspectionDetailId
         ? { ...q, statusInspectionConfig: true }
-        : q
+        : q,
     );
     store.setFullInspection({ ...current, questions: updatedQuestions });
     store.setStepWizard(2);
@@ -396,17 +396,17 @@ const GenerateStep3 = () => {
     });
 
     const currentGroupQuestions = updatedQuestions.filter(
-      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName
+      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName,
     );
     const groupCompleted = currentGroupQuestions.every(
-      (q) => q.statusInspectionConfig
+      (q) => q.statusInspectionConfig,
     );
 
     const updatedInspection = {
       ...current,
       questions: updatedQuestions,
       statusInspectionConfig: updatedQuestions.every(
-        (q) => q.statusInspectionConfig
+        (q) => q.statusInspectionConfig,
       ),
     };
     store.setFullInspection(updatedInspection);
@@ -415,7 +415,7 @@ const GenerateStep3 = () => {
 
     if (!groupCompleted) {
       const nextUnanswered = currentGroupQuestions.find(
-        (q) => !q.statusInspectionConfig
+        (q) => !q.statusInspectionConfig,
       );
       if (nextUnanswered) {
         store.setFullQuestion(nextUnanswered);
@@ -455,24 +455,24 @@ const GenerateStep3 = () => {
     });
 
     const currentGroupQuestions = updatedQuestions.filter(
-      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName
+      (q) => q.groupId === fq.groupId && q.groupName === fq.groupName,
     );
     const groupCompleted = currentGroupQuestions.every(
-      (q) => q.statusInspectionConfig
+      (q) => q.statusInspectionConfig,
     );
 
     const updatedInspection = {
       ...current,
       questions: updatedQuestions,
       statusInspectionConfig: updatedQuestions.every(
-        (q) => q.statusInspectionConfig
+        (q) => q.statusInspectionConfig,
       ),
     };
     store.setFullInspection(updatedInspection);
 
     if (!groupCompleted) {
       const nextUnanswered = currentGroupQuestions.find(
-        (q) => !q.statusInspectionConfig
+        (q) => !q.statusInspectionConfig,
       );
       if (nextUnanswered) {
         store.setFullQuestion(nextUnanswered);
@@ -492,19 +492,19 @@ const GenerateStep3 = () => {
     .filter(
       (q) =>
         q.groupId === fullQuestion?.groupId &&
-        q.groupName === fullQuestion?.groupName
+        q.groupName === fullQuestion?.groupName,
     )
     .every(
       (q) =>
         q.statusInspectionConfig ||
-        q.typeInspectionDetailId === fullQuestion?.typeInspectionDetailId
+        q.typeInspectionDetailId === fullQuestion?.typeInspectionDetailId,
     );
 
   useEffect(() => {
     if (!fullQuestion || !fullInspection) return;
 
     const q = fullInspection.questions.find(
-      (qq) => qq.typeInspectionDetailId === fullQuestion.typeInspectionDetailId
+      (qq) => qq.typeInspectionDetailId === fullQuestion.typeInspectionDetailId,
     );
 
     if (q && !q.originalAnswers && fullQuestion.answers) {
@@ -574,7 +574,7 @@ const GenerateStep3 = () => {
           {isText && (
             <button
               disabled={textResponse.length === 0}
-              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px] disabled:!bg-black/50"
               onClick={() => completeCurrentQuestion(textResponse)}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
@@ -584,7 +584,7 @@ const GenerateStep3 = () => {
           {(isSingle || isMultiple) && (
             <button
               disabled={selectedTree.length === 0}
-              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px] disabled:!bg-black/50"
               onClick={() => setShowRootPicker(true)}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
@@ -594,7 +594,7 @@ const GenerateStep3 = () => {
           {isSign && (
             <button
               disabled={!isSignValid}
-              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+              className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px] disabled:!bg-black/50"
               onClick={() => completeCurrentQuestion(signUrl)}
             >
               {isLastQuestionInGroup ? "Save" : "Continue"}
@@ -605,7 +605,7 @@ const GenerateStep3 = () => {
 
       <div className="flex items-center justify-center mt-5 px-6">
         <button
-          className="btn font-normal bg-red-300 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full  md:max-w-[300px] mx-auto text-[13px] transition-all hover:bg-red-600"
+          className="btn font-normal bg-red-600 text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full  md:max-w-[300px] mx-auto text-[13px] transition-all hover:bg-red-600"
           onClick={() => useInspectionFullStore.getState().setStepWizard(2)}
         >
           {t("step3.2")}
@@ -621,8 +621,8 @@ const GenerateStep3 = () => {
               updateSelectedItems(
                 prev,
                 String(modalAnswer.typeInspectionDetailAnswerId),
-                items
-              )
+                items,
+              ),
             );
             setShowItemModal(false);
           }}

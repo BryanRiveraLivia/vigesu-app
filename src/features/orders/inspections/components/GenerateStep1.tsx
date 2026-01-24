@@ -56,20 +56,20 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const goStep = async (
     typeInspectionId: number,
     groupName: string,
-    groupId: number
+    groupId: number,
   ) => {
     try {
       const store = useInspectionFullStore.getState();
       const previous = store.fullInspection;
 
       const res = await axiosInstance.get<IFullTypeInspection>(
-        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
+        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`,
       );
 
       // fusiona respuestas anteriores si existen
       const mergedQuestions = res.data.questions.map((q) => {
         const prev = previous?.questions.find(
-          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId
+          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId,
         );
         return {
           ...q,
@@ -99,7 +99,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   };
 
   const extractAnswerRecursiveArray = (
-    answers: IFullAnswer[]
+    answers: IFullAnswer[],
   ): IFullAnswer[] => {
     return answers.flatMap((answer) => [
       {
@@ -170,7 +170,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         );
       }
       toast.success(`${tToasts("ok")}: ${tToasts("msj.28")}`);
@@ -198,8 +198,8 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                     acc[question.groupName].push(question);
                     return acc;
                   },
-                  {} as Record<string, IFullQuestion[]>
-                )
+                  {} as Record<string, IFullQuestion[]>,
+                ),
               ).map(([groupName, questions]) => {
                 const groupId = questions[0]?.groupId;
                 return (
@@ -208,14 +208,14 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                       goStep(
                         fullInspection.typeInspectionId,
                         groupName,
-                        groupId
+                        groupId,
                       )
                     }
                     className={clsx(
                       `w-full flex flex-row card lg:card-side  shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5  text-white `,
                       questions.every((q) => q.statusInspectionConfig)
                         ? `bg-green-800/80 hover:bg-green-800 hover:text-white/80`
-                        : `bg-black/80 hover:bg-[#191917] hover:text-white/80`
+                        : `bg-black/80 hover:bg-[#191917] hover:text-white/80`,
                     )}
                     key={groupName}
                   >
@@ -224,7 +224,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                         ` w-fit flex items-center justify-center p-2`,
                         questions.every((q) => q.statusInspectionConfig)
                           ? `bg-green-800`
-                          : `bg-[#191917]`
+                          : `bg-[#191917]`,
                       )}
                     >
                       {questions.every((q) => q.statusInspectionConfig) ? (
@@ -273,7 +273,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
 
       <div className="text-center mt-5">
         <button
-          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px] disabled:!bg-black/50"
           disabled={
             !fullInspection?.questions.every((q) => q.statusInspectionConfig)
           }

@@ -19,17 +19,17 @@ const PremierFHWA: React.FC<PropsPDF> = ({
   console.log("details", inspectionDetails);
   const matchById = useMemo(
     () => buildQuestionMatcherGeneric(data, inspectionDetails),
-    [data, inspectionDetails]
+    [data, inspectionDetails],
   );
   return (
     <>
       <div className="header flex flex-col md:flex-row  justify-between gap-5 md:gap-10 items-center">
         <div className="flex flex-col sm:flex-row w-full md:w-1/2  gap-5 md:gap-10">
           <div className="w-full sm:w-1/2 md:w-1/2">
-            <Image
-              src={logo}
+            <img
+              src={logo.src}
               alt="Logo"
-              width={150}
+              style={{ width: "150px" }}
               className="min-w-[200px] mx-auto "
             />
           </div>
@@ -481,7 +481,7 @@ const LineBody: FC<LineBodyProps> = ({
     <tr
       className={clsx(
         enableBorderTop && "border-t",
-        enableBorderBottom && "border-b"
+        enableBorderBottom && "border-b",
       )}
     >
       <td className="p-2 border-r ">
@@ -534,7 +534,7 @@ const LineBodyTires: FC<LineBodyTiresProps> = ({
       <tr
         className={clsx(
           enableBorderTop && "border-t",
-          enableBorderBottom && "border-b"
+          enableBorderBottom && "border-b",
         )}
       >
         <td className="p-2 text-center border-r">{label1}</td>
