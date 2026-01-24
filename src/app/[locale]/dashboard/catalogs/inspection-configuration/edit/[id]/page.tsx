@@ -1,8 +1,8 @@
 "use client";
 import CreateOrder from "@/features/inspections/inspection-configuration/create-inspection/CreateOrder";
 import EditOrder from "@/features/inspections/inspection-configuration/edit-inspection/EditOrder";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
-import BackButton from "@/shared/components/shared/BackButton";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
+import BackButton from "@/presentation/components/shared/BackButton";
 import React, { useState } from "react";
 
 const Page = () => {

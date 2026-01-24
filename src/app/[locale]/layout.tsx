@@ -3,7 +3,7 @@ import { Poppins } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import "@/shared/styles/globals.css";
+import "@/presentation/styles/globals.css";
 
 import { Toaster } from "sonner";
 import SessionGuard from "@/SessionGuard";

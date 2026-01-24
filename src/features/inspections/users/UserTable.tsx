@@ -1,12 +1,12 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { FaRegEdit } from "react-icons/fa";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import UserModal from "./create/UserModal";
 import { usePathname, useRouter } from "next/navigation";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 
 interface IUser {
   userId: number;

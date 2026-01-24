@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { generateFakeTableData } from "@/shared/data/fakeTableData";
+import { generateFakeTableData } from "@/core/constants/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/inspection/ITypes";
+import { TableListProps } from "@/core/types/inspection/ITypes";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 

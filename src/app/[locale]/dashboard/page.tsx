@@ -1,4 +1,4 @@
-import BoxContent from "@/shared/components/shared/BoxContent";
+import BoxContent from "@/presentation/components/shared/BoxContent";
 import { redirect } from "next/navigation";
 import React from "react";
 

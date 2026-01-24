@@ -1,5 +1,5 @@
 "use client";
-import { DOMAIN } from "@/config/constants";
+import { DOMAIN } from "@/core/config/constants";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useDropzone, FileWithPath } from "react-dropzone";

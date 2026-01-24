@@ -1,7 +1,7 @@
 "use client";
 import TableList from "@/features/orders/TableList";
-import BackButton from "@/shared/components/shared/BackButton";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import BackButton from "@/presentation/components/shared/BackButton";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useRef, useState, useEffect } from "react";
@@ -9,17 +9,17 @@ import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { DayPicker } from "react-day-picker";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import {
   WorkOrderStatus,
   WorkOrderStatusLabel,
 } from "@/features/orders/models/workOrder.types";
 import { debounce } from "lodash";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { toast } from "sonner";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
-import CaliforniaBitInspection from "@/shared/components/shared/InspectionsPdf/CaliforniaBitInspection";
+import CaliforniaBitInspection from "@/presentation/components/shared/InspectionsPdf/CaliforniaBitInspection";
 
 interface CustomerOption {
   id: number;

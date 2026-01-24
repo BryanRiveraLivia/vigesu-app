@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
 
 const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en ms
 

@@ -12,14 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormChassi from "../types-pdf/FormChassiEdit/FormChassi";
 import { debounce } from "lodash";
 import type { DebouncedFunc } from "lodash";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { CustomerOption } from "@/shared/utils/orderMapper";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { CustomerOption } from "@/core/utils/orderMapper";
 import {
   ExportedAnswer,
   ExportedQuestion,
-} from "@/shared/types/inspection/ITypes";
-import Loading from "@/shared/components/shared/Loading";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+} from "@/core/types/inspection/ITypes";
+import Loading from "@/presentation/components/shared/Loading";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import { InspectionStatusLabel } from "../models/typeInspection";

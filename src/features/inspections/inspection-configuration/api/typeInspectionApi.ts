@@ -1,6 +1,6 @@
 // 📁 src/features/inspections/inspection-configuration/api/typeInspectionApi.ts
 
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { GetTypeInspectionResponse } from "../models/typeInspection";
 
 export interface GetTypeInspectionParams {

@@ -1,7 +1,7 @@
 "use client";
 import TableList from "@/features/inspections/services/TableList";
-import BackButton from "@/shared/components/shared/BackButton";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import BackButton from "@/presentation/components/shared/BackButton";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";

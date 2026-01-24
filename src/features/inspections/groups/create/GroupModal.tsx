@@ -4,15 +4,15 @@
 import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { StatusEnum } from "@/features/inspections/models/GroupTypes";
+import { GroupStatusEnum } from "@/core/domain/entities/group.entity";
+import { useGroupMutations } from "@/presentation/hooks/groups/useGroupMutations";
 
 interface GroupModalProps {
   onClose: () => void;
   onSuccess: () => void;
   editMode?: boolean;
   defaultValue?: string;
-  defaultStatus?: StatusEnum;
+  defaultStatus?: GroupStatusEnum;
   groupIdToEdit?: number;
 }
 
@@ -21,33 +21,28 @@ const GroupModal: React.FC<GroupModalProps> = ({
   onSuccess,
   editMode = false,
   defaultValue = "",
-  defaultStatus = StatusEnum.Active,
+  defaultStatus = GroupStatusEnum.Active,
   groupIdToEdit,
 }) => {
   const [name, setName] = useState(defaultValue);
-  const [status, setStatus] = useState<StatusEnum>(defaultStatus);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<GroupStatusEnum>(defaultStatus);
+
+  const { createGroup, updateGroup, loading } = useGroupMutations();
 
   const handleSubmit = async () => {
     if (!name.trim()) return alert("El nombre es obligatorio");
-    setLoading(true);
+
     try {
       if (editMode && groupIdToEdit !== undefined) {
-        await axiosInstance.put(`/Group/${groupIdToEdit}`, {
-          groupId: groupIdToEdit,
-          name,
-          status,
-        });
+        await updateGroup(groupIdToEdit, name, status);
       } else {
-        await axiosInstance.post("/Group", { name });
+        await createGroup(name);
       }
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Error al guardar grupo", error);
       alert("Hubo un error al guardar el grupo");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -73,10 +68,12 @@ const GroupModal: React.FC<GroupModalProps> = ({
             <select
               className="select w-full input-lg"
               value={status}
-              onChange={(e) => setStatus(Number(e.target.value))}
+              onChange={(e) =>
+                setStatus(Number(e.target.value) as GroupStatusEnum)
+              }
             >
-              <option value={StatusEnum.Active}>Activo</option>
-              <option value={StatusEnum.Inactive}>Inactivo</option>
+              <option value={GroupStatusEnum.Active}>Activo</option>
+              <option value={GroupStatusEnum.Inactive}>Inactivo</option>
             </select>
           </div>
         )}

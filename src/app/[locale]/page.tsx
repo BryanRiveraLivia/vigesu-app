@@ -1,6 +1,6 @@
 "use client";
 
-import FormGroup from "@/shared/components/shared/FormGroup";
+import FormGroup from "@/presentation/components/shared/FormGroup";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
 
 import { setCookie } from "cookies-next";
 import { toast } from "sonner";

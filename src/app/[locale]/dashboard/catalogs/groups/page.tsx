@@ -1,10 +1,10 @@
 "use client";
 import GroupModal from "@/features/inspections/groups/create/GroupModal";
 import TableList from "@/features/inspections/groups/TableList";
-import { GroupStatusLabel } from "@/features/inspections/models/GroupTypes";
+import { GroupStatusLabel } from "@/core/domain/entities/group.entity";
 import { WorkOrderStatusLabel } from "@/features/inspections/models/inspections.types";
-import BackButton from "@/shared/components/shared/BackButton";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import BackButton from "@/presentation/components/shared/BackButton";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";

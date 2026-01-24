@@ -1,4 +1,4 @@
-import { COMPANY_INFO } from "@/config/constants";
+import { COMPANY_INFO } from "@/core/config/constants";
 import { constants } from "buffer";
 import React from "react";
 

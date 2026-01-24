@@ -1,8 +1,8 @@
 // src/features/orders/api/workOrdersApi.ts
 
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { WorkOrderResponse } from "../models/inspections.types";
-import { WorkOrderFilters } from "@/shared/types/order/IFilters";
+import { WorkOrderFilters } from "@/core/types/order/IFilters";
 import { toast } from "sonner";
 
 export const getWorkOrders = async (

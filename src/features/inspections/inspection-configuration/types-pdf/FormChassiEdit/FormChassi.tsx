@@ -4,13 +4,13 @@ import InspectionModal from "./InspectionModal";
 import { AnswerNode } from "./AnswerItem";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { GrDuplicate } from "react-icons/gr";
 import { MdEdit } from "react-icons/md";
 import {
   ExportedAnswer,
   ExportedQuestion,
-} from "@/shared/types/inspection/ITypes";
+} from "@/core/types/inspection/ITypes";
 import {
   TypeQuestion,
   TypeQuestionLabel,

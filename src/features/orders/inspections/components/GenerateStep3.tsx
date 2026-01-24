@@ -2,7 +2,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
-import { isColorLight } from "@/shared/utils/utils";
+import { isColorLight } from "@/core/utils/utils";
 import { IFullAnswer } from "../types/IFullTypeInspection";
 import Wizard from "./Wizard";
 import ModalUsingItem from "./ModalUsingItem";
@@ -11,7 +11,7 @@ import clsx from "clsx";
 import { TypeQuestion, TypeQuestionLabel } from "../../models/workOrder.types";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import Lottie from "lottie-react";
-import checkLottie from "@/assets/lotties/check.json";
+import checkLottie from "@/presentation/assets/lotties/check.json";
 import { toast } from "sonner";
 import AnswerSign from "./typeQuest/AnswerSign";
 import AnswerText from "./typeQuest/AnswerText";

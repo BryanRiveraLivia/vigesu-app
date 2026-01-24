@@ -2,11 +2,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { FiTrash2 } from "react-icons/fi";
-import BackButton from "@/shared/components/shared/BackButton";
-import PDFViewer from "@/shared/components/shared/PDFViewer";
-import { deslugify } from "@/shared/utils/utils";
-import { DOMAIN } from "@/config/constants";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import BackButton from "@/presentation/components/shared/BackButton";
+import PDFViewer from "@/presentation/components/shared/PDFViewer";
+import { deslugify } from "@/core/utils/utils";
+import { DOMAIN } from "@/core/config/constants";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 
 import { useTranslations } from "next-intl";
 

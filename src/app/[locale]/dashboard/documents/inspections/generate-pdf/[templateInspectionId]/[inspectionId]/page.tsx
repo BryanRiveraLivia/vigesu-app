@@ -2,21 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams, usePathname } from "next/navigation";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { LiftgateInspection } from "@/shared/types/order/ITypes";
-import Loading from "@/shared/components/shared/Loading";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { LiftgateInspection } from "@/core/types/order/ITypes";
+import Loading from "@/presentation/components/shared/Loading";
 import LiftgateInspectionCheckList, {
   IInspection,
   IInspectionDetail,
-} from "@/shared/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
-import BackButton from "@/shared/components/shared/BackButton";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+} from "@/presentation/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
+import BackButton from "@/presentation/components/shared/BackButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { FiEdit, FiPrinter } from "react-icons/fi";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { IoCloseOutline } from "react-icons/io5";
 import { useReactToPrint } from "react-to-print";
-import { generatePDF } from "@/shared/utils/generatePDF";
-import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
+import { generatePDF } from "@/core/utils/generatePDF";
+import RenderComponentByNumber from "@/presentation/components/shared/InspectionsPdf/RenderComponentByNumber";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 

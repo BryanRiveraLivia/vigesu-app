@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { COMPANY_INFO } from "@/config/constants";
+import { COMPANY_INFO } from "@/core/config/constants";
 import React, { FC, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
@@ -9,20 +9,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import {
   mapOrderEditFormToApiPayload,
   mapOrderFormToApiPayload,
-} from "@/shared/utils/orderMapper";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+} from "@/core/utils/orderMapper";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { debounce } from "lodash";
 import clsx from "clsx";
 import { MdEdit } from "react-icons/md";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { toast } from "sonner";
-import { renameFileWithUniqueName } from "@/shared/utils/utils";
+import { renameFileWithUniqueName } from "@/core/utils/utils";
 import { useTranslations } from "next-intl";
 
 interface WorkOrderDetail {

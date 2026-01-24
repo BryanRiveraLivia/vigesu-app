@@ -4,7 +4,7 @@ import AnswerItem, { type AnswerNode } from "./AnswerItem";
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
 import { debounce } from "lodash";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 
 type Group = { groupId: number; name: string; status: number };
 type TemplateInspectionQuestion = {

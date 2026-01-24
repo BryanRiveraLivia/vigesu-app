@@ -2,10 +2,10 @@
 import { InspectionStatusLabel } from "@/features/inspections/inspection-configuration/models/typeInspection";
 import TableList from "@/features/orders/inspections/TableList";
 import { WorkOrderStatusLabel } from "@/features/orders/models/workOrder.types";
-import BackButton from "@/shared/components/shared/BackButton";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { CustomerOption } from "@/shared/utils/orderMapper";
+import BackButton from "@/presentation/components/shared/BackButton";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { CustomerOption } from "@/core/utils/orderMapper";
 import { debounce } from "lodash";
 import { useTranslations } from "next-intl";
 import Link from "next/link";

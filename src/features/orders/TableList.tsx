@@ -5,14 +5,14 @@ import { getWorkOrders } from "./api/workOrdersApi";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegEye } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/order/ITypes";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { TableListProps } from "@/core/types/order/ITypes";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
-import Loading from "@/shared/components/shared/Loading";
-import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
+import Loading from "@/presentation/components/shared/Loading";
+import { getWorkOrderStatusLabel } from "@/core/utils/utils";
 import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {

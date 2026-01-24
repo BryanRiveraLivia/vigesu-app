@@ -1,6 +1,6 @@
 "use client";
 import React, { FC, useEffect, useRef, useState } from "react";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import {
@@ -12,7 +12,7 @@ import {
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { GiAutoRepair } from "react-icons/gi";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

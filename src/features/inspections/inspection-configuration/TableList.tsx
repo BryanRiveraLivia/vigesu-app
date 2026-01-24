@@ -2,17 +2,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TableListProps } from "@/shared/types/inspection/ITypes";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import { TableListProps } from "@/core/types/inspection/ITypes";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { FaRegEdit } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getTypeInspections } from "@/features/inspections/inspection-configuration/api/typeInspectionApi";
 import { ITypeInspectionItem } from "./models/typeInspection";
 import { toast } from "sonner";
-import { getInspectionStatusLabel } from "@/shared/utils/utils";
-import Loading from "@/shared/components/shared/Loading";
+import { getInspectionStatusLabel } from "@/core/utils/utils";
+import Loading from "@/presentation/components/shared/Loading";
 import { usePathname, useRouter } from "next/navigation";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { useTranslations } from "next-intl";
 
 const TableList = ({ objFilter }: TableListProps) => {

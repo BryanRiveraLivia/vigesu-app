@@ -2,12 +2,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 import { AiOutlineSave } from "react-icons/ai";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { IoMdClose } from "react-icons/io";
 import { v4 as uuidv4 } from "uuid";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import debounce from "lodash/debounce";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
 
 interface ItemOption {

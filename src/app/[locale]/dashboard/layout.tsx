@@ -1,18 +1,18 @@
 "use client";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
 import LanguageSwitcher from "@/features/locale/LanguageSwitcher";
-import Breadcrumb from "@/shared/components/shared/Breadcrumb";
-import MenuAside from "@/shared/components/shared/MenuAside";
-import { stripLocalePage } from "@/shared/lib/utils";
-import { useSidebarStore } from "@/shared/stores/useSidebarStore";
+import Breadcrumb from "@/presentation/components/shared/Breadcrumb";
+import MenuAside from "@/presentation/components/shared/MenuAside";
+import { stripLocalePage } from "@/infrastructure/lib/utils";
+import { useSidebarStore } from "@/presentation/stores/useSidebarStore";
 import { usePathname, useRouter } from "next/navigation";
 import { BiSupport } from "react-icons/bi";
 import { FaRegBell } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { useEffect } from "react";
-import { useSessionValidator } from "@/shared/hooks/useSessionValidator";
-import Loading from "@/shared/components/shared/Loading";
-import { useLoadingStore } from "@/shared/stores/useLoadinStore";
+import { useSessionValidator } from "@/presentation/hooks/useSessionValidator";
+import Loading from "@/presentation/components/shared/Loading";
+import { useLoadingStore } from "@/presentation/stores/useLoadinStore";
 import clsx from "clsx";
 
 import { useTranslations } from "next-intl";

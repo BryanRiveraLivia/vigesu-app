@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FiTrash2 } from "react-icons/fi";
 import { VscOpenPreview } from "react-icons/vsc";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { TableListProps } from "@/shared/types/inspection/ITypes";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
+import { TableListProps } from "@/core/types/inspection/ITypes";
 import {
   getTemplateInspections,
   TemplateInspection,
 } from "../inspections/api/inspectionApi";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { slugify } from "@/shared/utils/utils";
+import { slugify } from "@/core/utils/utils";
 
 const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
   const router = useRouter();

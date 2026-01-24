@@ -1,18 +1,18 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { UserStatusLabel } from "../../models/UsersTypes";
 import SignaturePad, { SignaturePadRef } from "../../users/SignaturePad";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useParams, useRouter } from "next/navigation";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { toast } from "sonner";
-import { DOMAIN } from "@/config/constants";
+import { DOMAIN } from "@/core/config/constants";
 import debounce from "lodash/debounce";
 import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
 
 type EmployeeOption = { id: string; name: string };
 

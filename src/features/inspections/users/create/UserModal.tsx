@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { UserStatusLabel } from "../../models/UsersTypes";
 import SignaturePad, { SignaturePadRef } from "../SignaturePad";
 import { useRef } from "react";

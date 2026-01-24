@@ -1,13 +1,13 @@
 "use client";
 import { useState, useMemo } from "react";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import { usePathname } from "next/navigation";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import { FiPlus } from "react-icons/fi";
 import UserModal from "@/features/inspections/users/create/UserModal";
 import UserTable from "@/features/inspections/users/UserTable";
-import BackButton from "@/shared/components/shared/BackButton";
+import BackButton from "@/presentation/components/shared/BackButton";
 import { UserStatusLabel } from "@/features/inspections/models/UsersTypes";
 import Link from "next/link";
 

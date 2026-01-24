@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { IInspectionItem } from "../models/inspection.types";
 
 export interface GetInspectionsResponse {

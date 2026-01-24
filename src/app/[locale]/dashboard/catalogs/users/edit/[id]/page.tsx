@@ -1,8 +1,8 @@
 "use client";
 import CreateOrder from "@/features/inspections/inspection-configuration/create-inspection/CreateOrder";
 import EditOrder from "@/features/inspections/users/edit/EditOrder";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
-import BackButton from "@/shared/components/shared/BackButton";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
+import BackButton from "@/presentation/components/shared/BackButton";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 

@@ -3,24 +3,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { WorkOrder } from "@/shared/types/order/ITypes";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { WorkOrder } from "@/core/types/order/ITypes";
 import { useReactToPrint } from "react-to-print";
-import Loading from "@/shared/components/shared/Loading";
-import WorkOrderPdf from "@/shared/components/shared/WorkOrderPdf/WorkOrderPdf";
-import BackButton from "@/shared/components/shared/BackButton";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import Loading from "@/presentation/components/shared/Loading";
+import WorkOrderPdf from "@/presentation/components/shared/WorkOrderPdf/WorkOrderPdf";
+import BackButton from "@/presentation/components/shared/BackButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { FiEdit, FiPrinter } from "react-icons/fi";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { usePathname } from "next/navigation";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { useDownloadPDF } from "@/shared/hooks/useDownloadPDF";
-import { sanitizeElementForPDF } from "@/shared/utils/utils";
+import { useDownloadPDF } from "@/presentation/hooks/useDownloadPDF";
+import { sanitizeElementForPDF } from "@/core/utils/utils";
 import html2pdf from "html2pdf.js";
 import { CiEdit } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
-import { generatePDF } from "@/shared/utils/generatePDF";
+import { generatePDF } from "@/core/utils/generatePDF";
 import { useTranslations } from "next-intl";
 
 const GeneratePdfPage = () => {

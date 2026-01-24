@@ -1,7 +1,7 @@
-import { DOMAIN } from "@/config/constants";
-import Loading from "@/shared/components/shared/Loading";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { DOMAIN } from "@/core/config/constants";
+import Loading from "@/presentation/components/shared/Loading";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 

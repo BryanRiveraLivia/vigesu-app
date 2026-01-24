@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import Loading from "@/shared/components/shared/Loading";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
+import Loading from "@/presentation/components/shared/Loading";
 import { FaRegEye } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
 import { IInspectionItem } from "./models/inspection.types";
-import { formatDate } from "@/shared/utils/utils";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { formatDate } from "@/core/utils/utils";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import {
   TypeInspectionOrders,
   TypeInspectionOrdersLabel,

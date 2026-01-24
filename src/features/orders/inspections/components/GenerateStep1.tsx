@@ -1,6 +1,6 @@
 "use client";
 import React, { FC, useEffect, useRef, useState } from "react";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
 import {
@@ -13,7 +13,7 @@ import {
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { GiAutoRepair } from "react-icons/gi";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,13 +22,13 @@ import { group } from "console";
 import Wizard from "./Wizard";
 import Lottie from "lottie-react";
 
-import checkLottie from "@/assets/lotties/check.json";
+import checkLottie from "@/presentation/assets/lotties/check.json";
 import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
 import { toast } from "sonner";
 import ImageUploader from "../../create-order/ImageUploader";
-import { useAuthUser } from "@/shared/stores/useAuthUser";
+import { useAuthUser } from "@/presentation/stores/useAuthUser";
 import EmailConfirmationModal from "./EmailConfirmationModal";
 import { useTranslations } from "next-intl";
 

@@ -3,9 +3,9 @@ import CreateOrder from "@/features/inspections/inspection-configuration/create-
 import GenerateStep1 from "@/features/orders/inspections/components/GenerateStep0";
 import { IInspectionItemFull } from "@/features/orders/inspections/types/IInspectionDetailFull";
 
-import BackButton from "@/shared/components/shared/BackButton";
-import Loading from "@/shared/components/shared/Loading";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import BackButton from "@/presentation/components/shared/BackButton";
+import Loading from "@/presentation/components/shared/Loading";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";

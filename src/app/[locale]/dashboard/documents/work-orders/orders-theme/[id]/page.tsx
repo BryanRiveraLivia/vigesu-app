@@ -1,13 +1,13 @@
 "use client";
-import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import PDFViewer from "@/shared/components/shared/PDFViewer";
-import BackButton from "@/shared/components/shared/BackButton";
+import PDFViewer from "@/presentation/components/shared/PDFViewer";
+import BackButton from "@/presentation/components/shared/BackButton";
 
 const Page = () => {
   const pathname = usePathname();

@@ -1,18 +1,18 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import { z } from "zod";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { UserStatusLabel } from "../../models/UsersTypes";
 import SignaturePad, { SignaturePadRef } from "../SignaturePad";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
 // Opcional si alguna vez quieres precargar algo del usuario logueado
-// import { useAuthStore } from "@/shared/stores/useAuthStore";
+// import { useAuthStore } from "@/presentation/stores/useAuthStore";
 
 type EmployeeOption = { id: string; name: string };
 
