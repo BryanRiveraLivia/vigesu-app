@@ -20,7 +20,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/core/types/TGeneral";
 import { usePathname, useRouter } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
-import { getTotalWorkOrders } from "@/features/orders/api/workOrdersApi";
+import { getTotalWorkOrdersUseCase } from "@/core/di/container";
 import { useAuthUser } from "@/presentation/stores/useAuthUser";
 import { getInspections } from "@/features/orders/inspections/api/inspectionApi";
 import Loading from "./Loading";
@@ -102,7 +102,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
     allLinks
       .filter(
         (link) =>
-          cleanPath === link.href || cleanPath?.startsWith(link.href + "/")
+          cleanPath === link.href || cleanPath?.startsWith(link.href + "/"),
       )
       .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? undefined;
 
@@ -113,7 +113,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
 
   useEffect(() => {
     const fetchTotal = async () => {
-      const count = await getTotalWorkOrders();
+      const count = await getTotalWorkOrdersUseCase.execute();
       setTotalOrders(count ?? 0);
     };
     const fetchTotalInspections = async () => {

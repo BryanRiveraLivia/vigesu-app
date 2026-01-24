@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getWorkOrders } from "./api/workOrdersApi";
+import { getWorkOrdersUseCase } from "@/core/di/container";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegEye } from "react-icons/fa";
@@ -40,13 +40,13 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   // ==========================
   const handleSyncWorkOrder = async (
     workOrderId: number,
-    syncOnlyEstimate = false
+    syncOnlyEstimate = false,
   ) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
     try {
       const response = await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromWorkOrder",
-        { workOrderId }
+        { workOrderId },
       );
 
       const quickBookEstimatedId = response.data;
@@ -75,7 +75,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
   const sendPdfToQuickBooks = async (
     quickBookEstimatedId: number,
-    workOrderId: number
+    workOrderId: number,
   ) => {
     try {
       const response = await fetch(`/api/pdf/${workOrderId}`);
@@ -87,7 +87,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         `WorkOrder-${quickBookEstimatedId}.pdf`,
         {
           type: "application/pdf",
-        }
+        },
       );
 
       const formData = new FormData();
@@ -97,7 +97,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       await axiosInstance.post(
         "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
-        formData
+        formData,
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
@@ -118,7 +118,11 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         workorder: objFilter.workorder ? String(objFilter.workorder) : "",
       };
 
-      const response = await getWorkOrders(filterSend, page, rowsPerPage);
+      const response = await getWorkOrdersUseCase.execute(
+        filterSend,
+        page,
+        rowsPerPage,
+      );
 
       setAllData(response.items ?? []);
       setTotalRecords(response.totalCount ?? 0);
@@ -134,7 +138,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   // ==========================
   const updateWorkOrderState = async (
     workOrderId: number,
-    statusWorkOrder: number = WorkOrderStatus.Disabled
+    statusWorkOrder: number = WorkOrderStatus.Disabled,
   ) => {
     await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
       workOrderId,
@@ -288,7 +292,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                       label={tGeneral("btnPrint")}
                       onClick={() =>
                         router.push(
-                          `${pathname}/generate-pdf/${item.workOrderId}`
+                          `${pathname}/generate-pdf/${item.workOrderId}`,
                         )
                       }
                     />
