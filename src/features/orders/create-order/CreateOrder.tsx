@@ -404,7 +404,7 @@ const CreateOrder = () => {
                       <Loading
                         height="h-[39px]"
                         enableLabel={false}
-                        size="loading-sm "
+                        size="loading-sm"
                       />
                     </div>
                   )}
@@ -557,7 +557,7 @@ const CreateOrder = () => {
                   />
                   {isLoadingMechanic && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -636,7 +636,7 @@ const CreateOrder = () => {
                   />
                   {isLoadingServiceParts && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>

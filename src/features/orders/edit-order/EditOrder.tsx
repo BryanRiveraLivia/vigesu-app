@@ -565,7 +565,7 @@ const EditOrder = () => {
                       <Loading
                         height="h-[39px]"
                         enableLabel={false}
-                        size="loading-sm "
+                        size="loading-sm"
                       />
                     </div>
                   )}
@@ -715,7 +715,7 @@ const EditOrder = () => {
                   />
                   {isLoadingMechanic && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -795,7 +795,7 @@ const EditOrder = () => {
                   />
                   {isLoadingServiceParts && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>

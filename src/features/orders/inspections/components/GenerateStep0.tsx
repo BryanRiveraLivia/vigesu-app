@@ -251,7 +251,7 @@ const GenerateStep0 = () => {
                     <Loading
                       height="h-[39px]"
                       enableLabel={false}
-                      size="loading-sm "
+                      size="loading-sm"
                     />
                   </div>
                 )}

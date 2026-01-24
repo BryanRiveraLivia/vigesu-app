@@ -668,7 +668,7 @@ const CustomerSelector: React.FC<CustomerSelectorProps> = ({
         />
         {isLoadingCustomer && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-            <Loading height="h-[39px]" enableLabel={false} size="loading-sm " />
+            <Loading height="h-[39px]" enableLabel={false} size="loading-sm" />
           </div>
         )}
       </div>

@@ -1,7 +1,11 @@
 "use client";
 import React, { FC, useState } from "react";
 import { axiosInstance } from "@/core/utils/axiosInstance";
-import { IFullAnswer, IFullQuestion } from "../types/IFullTypeInspection";
+import {
+  IFullAnswer,
+  IFullQuestion,
+  IFullTypeInspection,
+} from "../types/IFullTypeInspection";
 import Loading from "@/presentation/components/shared/Loading";
 import { useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";

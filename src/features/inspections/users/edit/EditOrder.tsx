@@ -270,7 +270,7 @@ const EditOrder = () => {
               {/* Loader */}
               {isSearchingEmp && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                  <Loading enableLabel={false} size="loading-sm " />
+                  <Loading enableLabel={false} size="loading-sm" />
                 </div>
               )}
             </div>
