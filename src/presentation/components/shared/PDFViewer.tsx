@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from "react";
-
-interface PDFViewerProps {
-  file: string;
-  height?: number;
-}
+import React from "react";
+import { PDFViewerProps } from "./PDFViewer.types";
 
 const PDFViewer = ({ file, height }: PDFViewerProps) => {
   return (

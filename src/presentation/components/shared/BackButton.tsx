@@ -2,12 +2,7 @@
 import { usePageTitle } from "@/presentation/hooks/usePageTitle";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
-
-interface BackButtonProps {
-  title?: string;
-  disableArrow?: boolean;
-  link?: string;
-}
+import { BackButtonProps } from "./BackButton.types";
 
 const BackButton: FC<BackButtonProps> = ({
   title,

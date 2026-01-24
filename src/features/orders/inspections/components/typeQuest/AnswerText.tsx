@@ -1,17 +1,15 @@
 // components/AnswerText.tsx
+import { useTranslations } from "next-intl";
 import React from "react";
+import { AnswerTextProps } from "./AnswerText.types";
 
-interface Props {
-  value: string;
-  onChange: (text: string) => void;
-}
-
-const AnswerText = ({ value, onChange }: Props) => {
+const AnswerText = ({ value, onChange }: AnswerTextProps) => {
+  const t = useTranslations("placeholders");
   return (
     <div className="mt-6">
       <textarea
         className="textarea textarea-bordered w-full text-lg"
-        placeholder="Escribe tu respuesta..."
+        placeholder={t("write_answer")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />

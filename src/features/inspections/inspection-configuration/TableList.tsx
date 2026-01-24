@@ -75,7 +75,7 @@ const TableList = ({ objFilter }: TableListProps) => {
         `/TypeInspection/UpdateTypeInspectionState/${id}`,
         {
           typeInspectionId: id,
-        }
+        },
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.4")}`);
@@ -102,14 +102,17 @@ const TableList = ({ objFilter }: TableListProps) => {
   // ==========================
   // 🔹 VIEW
   // ==========================
+  const tGeneral = useTranslations("general");
+  const tStatus = useTranslations("inspection_status");
+
   return (
     <div className="overflow-x-auto space-y-4">
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="w-[25%] truncate">Name</th>
-            <th className="w-[30%] truncate">Description</th>
-            <th className="w-[15%] truncate">Status</th>
+            <th className="w-[25%] truncate">{tGeneral("name")}</th>
+            <th className="w-[30%] truncate">{tGeneral("description")}</th>
+            <th className="w-[15%] truncate">{tGeneral("status")}</th>
             <th className="w-[20%] truncate"></th>
           </tr>
         </thead>
@@ -123,7 +126,7 @@ const TableList = ({ objFilter }: TableListProps) => {
           ) : allData.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-6 text-center">
-                No records found
+                {tGeneral("no_records")}
               </td>
             </tr>
           ) : (
@@ -137,12 +140,12 @@ const TableList = ({ objFilter }: TableListProps) => {
                 <td className="text-center">
                   {item.status === 0 && (
                     <div className="badge badge-dash badge-success mx-auto whitespace-nowrap">
-                      {getInspectionStatusLabel(item.status)}
+                      {tStatus("0")}
                     </div>
                   )}
                   {item.status === 1 && (
                     <div className="badge badge-dash badge-error mx-auto whitespace-nowrap">
-                      {getInspectionStatusLabel(item.status)}
+                      {tStatus("1")}
                     </div>
                   )}
                 </td>
@@ -151,7 +154,7 @@ const TableList = ({ objFilter }: TableListProps) => {
                     icon={
                       <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                     }
-                    label="Edit"
+                    label={tGeneral("edit")}
                     onClick={() =>
                       router.push(`${pathname}/edit/${item.typeInspectionId}`)
                     }
@@ -161,7 +164,7 @@ const TableList = ({ objFilter }: TableListProps) => {
                       icon={
                         <FiTrash2 className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Delete"
+                      label={tGeneral("delete")}
                       onClick={() =>
                         deleteTypeInspection(item.typeInspectionId)
                       }

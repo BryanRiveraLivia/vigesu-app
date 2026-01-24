@@ -18,10 +18,7 @@ import {
 import clsx from "clsx";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { useTranslations } from "next-intl";
-
-interface TableListProps {
-  objFilter: { name: string };
-}
+import { TableListProps } from "./TableList.types";
 
 const TableList = ({ objFilter }: TableListProps) => {
   const tToasts = useTranslations("toast");
@@ -48,7 +45,7 @@ const TableList = ({ objFilter }: TableListProps) => {
   // 🔹 HELPERS
   // ==========================
   const getBadgeClass = (
-    status: TypeInspectionOrders | null | undefined
+    status: TypeInspectionOrders | null | undefined,
   ): string => {
     switch (status) {
       case TypeInspectionOrders.Create:
@@ -91,7 +88,7 @@ const TableList = ({ objFilter }: TableListProps) => {
   // ==========================
   const sendWorkOrderPdfToQuickBooks = async (
     quickBookEstimateId: string,
-    workOrderId: number
+    workOrderId: number,
   ) => {
     const resp = await fetch(`/api/pdf/${workOrderId}?type=workorder`);
     if (!resp.ok) throw new Error("No se pudo generar el PDF del WorkOrder");
@@ -109,13 +106,13 @@ const TableList = ({ objFilter }: TableListProps) => {
     await axiosInstance.post(
       "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
   };
 
   const sendInspectionPdfToQuickBooks = async (
     quickBookEstimateId: string,
-    inspectionId: number
+    inspectionId: number,
   ) => {
     const resp = await fetch(`/api/pdf/${inspectionId}?type=liftgate`);
     if (!resp.ok) throw new Error("No se pudo generar el PDF de la Inspección");
@@ -133,20 +130,20 @@ const TableList = ({ objFilter }: TableListProps) => {
     await axiosInstance.post(
       "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
   };
 
   const handleSyncWorkOrder = async (
     inspectionId: number,
-    syncOnlyEstimate = false
+    syncOnlyEstimate = false,
   ) => {
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
     try {
       // 1) Crear WorkOrder desde la inspección
       const { data: workOrderId } = await axiosInstance.post<number>(
         `/Inspection/CreateWorkOrdeFromInspection/${inspectionId}`,
-        { inspectionId }
+        { inspectionId },
       );
       if (typeof workOrderId !== "number") {
         throw new Error("No se obtuvo un workOrderId válido.");
@@ -155,7 +152,7 @@ const TableList = ({ objFilter }: TableListProps) => {
       // 2) Crear Estimate en QuickBooks
       const { data: quickBookEstimateId } = await axiosInstance.put<string>(
         "/QuickBooks/CreateEstimateFromWorkOrder",
-        { workOrderId }
+        { workOrderId },
       );
       if (!quickBookEstimateId) {
         throw new Error("No se obtuvo un quickBookEstimateId válido.");
@@ -173,7 +170,7 @@ const TableList = ({ objFilter }: TableListProps) => {
           inspectionId,
           quickBookEstimateId: String(quickBookEstimateId),
         },
-        { headers: { "Content-Type": "application/json" } }
+        { headers: { "Content-Type": "application/json" } },
       );
 
       // 5) Adjuntar PDF Inspección
@@ -210,7 +207,7 @@ const TableList = ({ objFilter }: TableListProps) => {
 
       await axiosInstance.put(
         `/Inspection/UpdateInspectionState/${inspectionId}`,
-        payload
+        payload,
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.23")}`);
@@ -266,7 +263,7 @@ const TableList = ({ objFilter }: TableListProps) => {
           ) : (
             allData.map((item) => {
               const status = Number(
-                item.statusInspection
+                item.statusInspection,
               ) as TypeInspectionOrders;
 
               return (
@@ -323,7 +320,7 @@ const TableList = ({ objFilter }: TableListProps) => {
                       label={t("home.11")}
                       onClick={() =>
                         router.push(
-                          `${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`
+                          `${pathname}/generate-pdf/${item?.templateInspectionId}/${item?.inspectionId}`,
                         )
                       }
                     />

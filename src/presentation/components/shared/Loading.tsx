@@ -1,12 +1,5 @@
 import React, { FC } from "react";
-
-interface LoadingProps {
-  height?: string;
-  enableLabel?: boolean;
-  label?: string;
-  size?: string;
-  className?: string;
-}
+import { LoadingProps } from "./Loading.types";
 
 const Loading: FC<LoadingProps> = ({
   height,

@@ -1,11 +1,11 @@
 import React from "react";
 import clsx from "clsx";
-
-interface DynamicTableProps {
-  children: React.ReactNode;
-  className?: string;
-  isEditable?: boolean;
-}
+import {
+  DynamicTableProps,
+  TableHeadProps,
+  TableRowProps,
+  TableCellProps,
+} from "./DynamicTable.types";
 
 export const DynamicTable: React.FC<DynamicTableProps> = ({
   children,
@@ -18,18 +18,13 @@ export const DynamicTable: React.FC<DynamicTableProps> = ({
       suppressContentEditableWarning
       className={clsx(
         className,
-        "w-full border-collapse border text-truncate "
+        "w-full border-collapse border text-truncate ",
       )}
     >
       {children}
     </table>
   );
 };
-
-interface TableHeadProps {
-  children: React.ReactNode;
-  className?: string;
-}
 
 export const TableHead: React.FC<TableHeadProps> = ({
   children,
@@ -38,22 +33,9 @@ export const TableHead: React.FC<TableHeadProps> = ({
   return <thead className={clsx("bg-black/5", className)}>{children}</thead>;
 };
 
-interface TableRowProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
 export const TableRow: React.FC<TableRowProps> = ({ children, className }) => {
   return <tr className={clsx("", className)}>{children}</tr>;
 };
-
-interface TableCellProps {
-  children?: React.ReactNode;
-  align?: "left" | "center" | "right";
-  className?: string;
-  isHeader?: boolean;
-  isEditable?: boolean;
-}
 
 export const TableCell: React.FC<TableCellProps> = ({
   children,
@@ -68,7 +50,7 @@ export const TableCell: React.FC<TableCellProps> = ({
       className={clsx(
         `p-2 !text-[11px] border text-${align}   `,
         isHeader && ` lg:truncate overflow-hidden`,
-        className
+        className,
       )}
     >
       <p
@@ -76,7 +58,7 @@ export const TableCell: React.FC<TableCellProps> = ({
         suppressContentEditableWarning
         className={clsx(
           isHeader ? "!text-[11px]" : "!text-[11px]",
-          " lg:truncate lg:whitespace-nowrap overflow-hidden block"
+          " lg:truncate lg:whitespace-nowrap overflow-hidden block",
         )}
       >
         {children}

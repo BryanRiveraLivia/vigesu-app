@@ -1,21 +1,14 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { axiosInstance } from "@/core/utils/axiosInstance";
 import { FaRegEdit } from "react-icons/fa";
 import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import UserModal from "./create/UserModal";
 import { usePathname, useRouter } from "next/navigation";
 import Loading from "@/presentation/components/shared/Loading";
-
-interface IUser {
-  userId: number;
-  userName: string;
-  password: string;
-  employeeId: string;
-  employeeName: string;
-  rol: number;
-}
+import { IUser, GetUsersResponse } from "./types/user.api";
 
 interface Props {
   objFilter: {
@@ -27,17 +20,9 @@ interface Props {
   refreshFlag: boolean;
 }
 
-// Estructura esperada desde /User
-interface GetUsersResponse {
-  items: IUser[];
-  pageNumber: number;
-  totalPages: number;
-  totalCount: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
-
 const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
+  const tUsers = useTranslations("users");
+  const tGeneral = useTranslations("general");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -132,9 +117,9 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
       <table className="table table-fixed w-full">
         <thead>
           <tr>
-            <th className="truncate">Username</th>
-            <th className="truncate">Employee</th>
-            <th className="truncate">Role</th>
+            <th className="truncate">{tUsers("username")}</th>
+            <th className="truncate">{tUsers("employee_name")}</th>
+            <th className="truncate">{tUsers("role")}</th>
             <th></th>
           </tr>
         </thead>
@@ -148,7 +133,7 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
           ) : users.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-6 text-center">
-                No records found
+                {tGeneral("no_records")}
               </td>
             </tr>
           ) : (
@@ -162,7 +147,7 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
                     icon={
                       <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                     }
-                    label="Edit"
+                    label={tGeneral("edit")}
                     onClick={() => {
                       router.push(`${pathname}/edit/${user.userId}`);
                     }}

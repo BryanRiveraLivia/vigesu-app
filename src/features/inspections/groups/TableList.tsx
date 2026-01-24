@@ -1,5 +1,6 @@
 // ... imports
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 // Domain Entities
 import {
   Group,
@@ -21,6 +22,10 @@ const TableList = ({
   refreshFlag,
   setRefreshFlag,
 }: TableListProps) => {
+  const tGeneral = useTranslations("general");
+  const tGroups = useTranslations("groups");
+  const tStatus = useTranslations("inspection_status");
+
   // Local state for pagination managed here, but data fetching delegated to hook
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10); // Could be dynamic if needed
@@ -65,8 +70,10 @@ const TableList = ({
         <table className="table table-fixed w-full">
           <thead>
             <tr>
-              <th className="w-[50%] truncate">Group</th>
-              <th className="w-[30%] truncate text-center">Status</th>
+              <th className="w-[50%] truncate">{tGroups("group")}</th>
+              <th className="w-[30%] truncate text-center">
+                {tGeneral("status")}
+              </th>
               <th className="w-[20%] truncate"></th>
             </tr>
           </thead>
@@ -80,7 +87,7 @@ const TableList = ({
             ) : groups.length === 0 ? (
               <tr>
                 <td colSpan={3} className="py-6 text-center">
-                  No records found
+                  {tGeneral("no_records")}
                 </td>
               </tr>
             ) : (
@@ -101,7 +108,7 @@ const TableList = ({
                       }`}
                     >
                       {/* Using domain label mapping directly or utility function if needed */}
-                      {GroupStatusLabel[item.status] ?? "Unknown"}
+                      {tStatus(`${item.status}` as any)}
                     </div>
                   </td>
 
@@ -110,7 +117,7 @@ const TableList = ({
                       icon={
                         <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Edit"
+                      label={tGeneral("edit")}
                       onClick={() => {
                         setSelectedGroup(item);
                         setShowModal(true);

@@ -21,14 +21,10 @@ import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
 import CaliforniaBitInspection from "@/presentation/components/shared/InspectionsPdf/CaliforniaBitInspection";
 
-interface CustomerOption {
-  id: number;
-  name: string;
-}
-interface MechanicOption {
-  id: number;
-  name: string;
-}
+import {
+  CustomerOption,
+  MechanicOption,
+} from "@/features/orders/types/work-order.api";
 
 const Page = () => {
   const tWorkOrders = useTranslations("workorders");
@@ -90,7 +86,7 @@ const Page = () => {
       } else {
         setCustomerOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   // búsqueda mecánico
@@ -115,7 +111,7 @@ const Page = () => {
       } else {
         setMechanicOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   // Handle Customer Input
@@ -283,7 +279,7 @@ const Page = () => {
                         <option key={key} value={key}>
                           {label}
                         </option>
-                      )
+                      ),
                     )}
                   </select>
                 </div>

@@ -1,13 +1,5 @@
 import React from "react";
-
-interface TreadDepthTableProps {
-  showAxleColumn?: boolean;
-  nameTable?: string;
-  columnCount?: number; // cantidad de columnas dinámicas
-  columnLabels?: string[]; // opcional si quieres custom headers
-  children: React.ReactNode;
-  isEditable?: boolean;
-}
+import { TreadDepthTableProps } from "./TreadDepthTable.types";
 
 const TreadDepthTable: React.FC<TreadDepthTableProps> = ({
   showAxleColumn = true,

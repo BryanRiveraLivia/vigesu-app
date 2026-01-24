@@ -222,7 +222,21 @@
     "btnPrint": "Print",
     "btnDelete": "Delete",
     "btnSearch": "Search",
-    "btnNew": "New"
+    "btnNew": "New",
+    "btnCancel": "Cancel",
+    "btnSend": "Send",
+    "btnSave": "Save",
+    "btnPreview": "Preview",
+    "sending": "Sending...",
+    "no_records": "No records found",
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "email_modal": {
+    "title": "Enter your email"
   },
   "dashboard": {
     "header": {
@@ -262,7 +276,12 @@
     "search_options": "Search options",
     "customer": "Customer",
     "status": "Status",
-    "pick_status": "Pick a status"
+    "pick_status": "Pick a status",
+    "edit_title": "Edit Group",
+    "new_title": "New Group",
+    "active": "Active",
+    "inactive": "Inactive",
+    "group": "Group"
   },
   "inspection_configuration": {
     "title": "Inspection configuration",
@@ -276,5 +295,16 @@
   "orders_theme": {
     "search_options": "Search options",
     "form": "Form"
+  },
+  "placeholders": {
+    "write_answer": "Write your answer...",
+    "email_example": "example@email.com",
+    "write_work_description": "Write work description...",
+    "answer": "Answer",
+    "group_name": "Group name"
+  },
+  "inspection_status": {
+    "0": "Active",
+    "1": "Inactive"
   }
 }

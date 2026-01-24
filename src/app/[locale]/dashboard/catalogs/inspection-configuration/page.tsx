@@ -20,6 +20,7 @@ const Page = () => {
   const pageTitle = usePageTitle();
   const t = useTranslations("inspection_configuration");
   const tGeneral = useTranslations("general");
+  const tStatus = useTranslations("inspection_status");
 
   const [title, setTitle] = useState<string>("");
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
@@ -76,7 +77,7 @@ const Page = () => {
       } else {
         setCustomerOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   // Handle Customer Input
@@ -173,7 +174,7 @@ const Page = () => {
                     {t("status")}
                   </legend>
                   <select
-                    defaultValue="Pick a color"
+                    defaultValue=""
                     className="select w-full text-lg input-lg"
                     onChange={(e) =>
                       setObjFilterForm({
@@ -187,11 +188,11 @@ const Page = () => {
                     </option>
 
                     {Object.entries(InspectionStatusLabel).map(
-                      ([key, label]) => (
+                      ([key, _label]) => (
                         <option key={key} value={key}>
-                          {label}
+                          {tStatus(key)}
                         </option>
-                      )
+                      ),
                     )}
                   </select>
                 </div>

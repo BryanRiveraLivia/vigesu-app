@@ -1,28 +1,11 @@
 "use client";
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useState } from "react";
 import { axiosInstance } from "@/core/utils/axiosInstance";
-import { IoSearchOutline } from "react-icons/io5";
-import { MdOutlineSettingsBackupRestore } from "react-icons/md";
-import {
-  CustomerOption,
-  TypeInspectionOption,
-} from "@/features/orders/inspections/types/IInspectionSelect";
-import { debounce } from "lodash";
-import {
-  IFullAnswer,
-  IFullQuestion,
-  IFullTypeInspection,
-} from "../types/IFullTypeInspection";
+import { IFullAnswer, IFullQuestion } from "../types/IFullTypeInspection";
 import Loading from "@/presentation/components/shared/Loading";
-import { GiAutoRepair } from "react-icons/gi";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
-import { group } from "console";
 import Wizard from "./Wizard";
-import Lottie from "lottie-react";
-
-import checkLottie from "@/presentation/assets/lotties/check.json";
 import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
@@ -31,27 +14,18 @@ import ImageUploader from "../../create-order/ImageUploader";
 import { useAuthUser } from "@/presentation/stores/useAuthUser";
 import EmailConfirmationModal from "./EmailConfirmationModal";
 import { useTranslations } from "next-intl";
-
-interface GenerateStep1Props {
-  ClientName: string;
-}
+import { GenerateStep1Props } from "./GenerateStep1.types";
 
 const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const t = useTranslations("inspections");
   const [showModal, setShowModal] = useState(false);
   const tToasts = useTranslations("toast");
-  const { userName, employeeName, rol, employeeId } = useAuthUser();
+  const { employeeName, employeeId } = useAuthUser();
   const [inspectionFiles, setInspectionFiles] = useState<File[]>([]);
 
   const router = useRouter();
-  const pathname = usePathname();
-  const {
-    groupedQuestions,
-    fullInspection,
-    setStepWizard,
-    setCompleteStep1,
-    setGroupedQuestions,
-  } = useInspectionFullStore();
+  const { groupedQuestions, fullInspection, setStepWizard, setCompleteStep1 } =
+    useInspectionFullStore();
 
   const goStep = async (
     typeInspectionId: number,
@@ -66,7 +40,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
         `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`,
       );
 
-      // fusiona respuestas anteriores si existen
       const mergedQuestions = res.data.questions.map((q) => {
         const prev = previous?.questions.find(
           (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId,
@@ -86,11 +59,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
 
       useInspectionFullStore.getState().setGroupName(groupName);
       useInspectionFullStore.getState().setGroupId(groupId);
-      /* const grouped = res.data.questions.reduce((acc, question) => {
-          if (!acc[question.groupName]) acc[question.groupName] = [];
-          acc[question.groupName].push(question);
-          return acc;
-        }, {} as Record<string, IFullQuestion[]>);*/
       setCompleteStep1(false);
       setStepWizard(2);
     } catch (err) {
@@ -114,8 +82,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
-    // Generar lista de nombres de archivos
-    const inspectionPhotoNames = inspectionFiles.map((f) => f.name);
     const payload = {
       typeInspectionId: fullInspection.typeInspectionId,
       customerId: fullInspection.customerId,
@@ -124,7 +90,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       employeeName: employeeName?.toString(),
       dateOfInspection: new Date().toISOString(),
       inspectionDetails: fullInspection.questions.map((q) => {
-        // 🔎 Obtenemos todas las respuestas recursivas
         const flatAnswers = extractAnswerRecursiveArray(q.answers ?? []);
 
         return {
@@ -150,17 +115,15 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       })),
     };
 
-    console.log("📤 Enviando payload a API:", payload);
     try {
       const response = await axiosInstance.post("/Inspection", payload);
-      const inspectionId = response.data; // ✅ número entero simple, como mencionaste
+      const inspectionId = response.data;
 
-      // 2️⃣ Subir archivos si existen
       if (inspectionFiles.length > 0) {
         const formData = new FormData();
-        formData.append("InspectionId", inspectionId.toString()); // ✅ ahora sí se pasa correctamente
+        formData.append("InspectionId", inspectionId.toString());
         inspectionFiles.forEach((file) => {
-          formData.append("Files", file); // ✅ debe coincidir con lo que espera el backend
+          formData.append("Files", file);
         });
 
         await axiosInstance.post(

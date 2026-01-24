@@ -56,20 +56,11 @@ const orderSchema = z.object({
   work_items: z.array(workItemSchema),
 });
 
-interface CustomerOption {
-  id: number;
-  name: string;
-}
-
-interface MechanicOption {
-  id: number;
-  name: string;
-}
-
-interface ItemOption {
-  id: number;
-  name: string;
-}
+import {
+  CustomerOption,
+  MechanicOption,
+  ItemOption,
+} from "../types/work-order.api";
 
 export type OrderForm = z.infer<typeof orderSchema>;
 
@@ -133,11 +124,11 @@ const CreateOrder = () => {
       } else {
         setCustomerOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleCustomerInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowDropdown(true);
@@ -173,11 +164,11 @@ const CreateOrder = () => {
       } else {
         setMechanicOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleMechanicInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowMechanicDropdown(true);
@@ -214,7 +205,7 @@ const CreateOrder = () => {
       } else {
         setItemOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleItemInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,7 +277,7 @@ const CreateOrder = () => {
         data,
         selectedCustomer,
         selectedMechanic,
-        files
+        files,
       );
 
       // Enviamos el primer POST para crear el WorkOrder
@@ -340,7 +331,7 @@ const CreateOrder = () => {
   };
 
   const handleNewItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setNewItem((prev) => ({ ...prev, [name]: value }));
@@ -638,7 +629,7 @@ const CreateOrder = () => {
                     onChange={handleItemInputChange}
                     ref={itemInputRef}
                     className={inputClass(
-                      !!newItemError && newItem.parts.trim() === ""
+                      !!newItemError && newItem.parts.trim() === "",
                     )}
                     type="text"
                     autoComplete="off"
@@ -690,7 +681,7 @@ const CreateOrder = () => {
               value={newItem.quantity}
               onChange={handleNewItemChange}
               className={inputClass(
-                !!newItemError && newItem.quantity.trim() === ""
+                !!newItemError && newItem.quantity.trim() === "",
               )}
               type="number"
             />
@@ -706,7 +697,7 @@ const CreateOrder = () => {
               value={newItem.description}
               onChange={handleNewItemChange}
               className={`!text-left p-2 ${inputClass(
-                !!newItemError && newItem.description.trim() === ""
+                !!newItemError && newItem.description.trim() === "",
               )}`}
               rows={3}
               placeholder={tWorkOrders("new.21")}
@@ -746,7 +737,7 @@ const CreateOrder = () => {
                       {...register(`work_items.${index}.description`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -756,7 +747,7 @@ const CreateOrder = () => {
                       type="text"
                       readOnly
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -765,7 +756,7 @@ const CreateOrder = () => {
                       {...register(`work_items.${index}.quantity`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -829,7 +820,7 @@ const CreateOrder = () => {
             {...register("observation")}
             className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
             rows={5}
-            placeholder="Write work description..."
+            placeholder={tWorkOrders("new.21")}
           ></textarea>
         </div>
       </div>

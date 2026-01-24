@@ -1,10 +1,5 @@
-import React from "react";
-
-interface AlertInfoProps {
-  children: React.ReactNode;
-  variant?: "info" | "success" | "warning" | "error" | "neutral";
-  className?: string;
-}
+import React, { FC } from "react";
+import { AlertInfoProps } from "./AlertInfo.types";
 
 const AlertInfo: React.FC<AlertInfoProps> = ({
   children,

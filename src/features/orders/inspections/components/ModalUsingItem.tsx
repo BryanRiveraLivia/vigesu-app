@@ -9,20 +9,7 @@ import { axiosInstance } from "@/core/utils/axiosInstance";
 import debounce from "lodash/debounce";
 import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
-
-interface ItemOption {
-  id: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-  _uid?: string;
-}
-
-interface ModalUsingItemProps {
-  onClose: () => void;
-  onSave: (items: ItemOption[]) => void;
-  initialItems?: ItemOption[];
-}
+import { ModalUsingItemProps, ItemOption } from "./ModalUsingItem.types";
 
 const ModalUsingItem = ({
   onClose,
@@ -38,36 +25,29 @@ const ModalUsingItem = ({
   const [quantity, setQuantity] = useState<number>(1);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  //  Debounced search function usando useRef como en tu ejemplo
   const debouncedFetch = useRef(
     debounce(async (term: string) => {
       const q = term.trim();
-
-      // Si no cumple el mínimo: limpia y apaga el loader
       if (q.length < 3) {
         setResults([]);
         setIsSearching(false);
         return;
       }
-
       try {
         setIsSearching(true);
-
         const res = await axiosInstance.get<ItemOption[]>(
-          "/QuickBooks/Items/GetItemName"
+          "/QuickBooks/Items/GetItemName",
         );
-
         const filtered = (res.data ?? []).filter((item) =>
-          item.name.toLowerCase().includes(q.toLowerCase())
+          item.name.toLowerCase().includes(q.toLowerCase()),
         );
-
         setResults(filtered);
       } catch (err) {
         console.error("Error fetching items:", err);
       } finally {
         setIsSearching(false);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleAddItem = () => {
@@ -100,7 +80,6 @@ const ModalUsingItem = ({
   return (
     <dialog open className="modal">
       <div className="modal-box w-11/12 max-w-2xl">
-        {/* Input y cantidad */}
         <div className="mb-3 flex flex-row gap-4 items-center justify-center">
           <div className="flex flex-col flex-1">
             <legend className="fieldset-legend text-lg font-normal">
@@ -115,25 +94,18 @@ const ModalUsingItem = ({
                   const value = e.target.value;
                   setQuery(value);
                   setSelectedItem(null);
-
                   const q = value.trim();
-
                   if (q.length === 0) {
-                    // limpiar si vacío
                     setResults([]);
                     setIsSearching(false);
                     return;
                   }
-
-                  // mostrar spinner mientras debounce corre
                   setIsSearching(true);
-                  debouncedFetch(q); // <- tu debouncedFetch corregido llama setIsSearching(false) en finally
+                  debouncedFetch(q);
                 }}
                 className="input input-lg text-lg w-full"
                 autoComplete="off"
               />
-
-              {/* Dropdown de resultados */}
               {results.length > 0 && (
                 <ul className="bg-base-100 w-full rounded-box shadow-md z-50 max-h-60 overflow-y-auto absolute mt-1">
                   {results.map((item) => (
@@ -141,10 +113,8 @@ const ModalUsingItem = ({
                       key={item.id}
                       className="cursor-pointer text-sm block w-full text-left px-4 py-2 hover:bg-gray-100"
                       onClick={() => {
-                        // 👉 evita que se ejecute la búsqueda que ya estaba encolada
                         debouncedFetch.cancel();
                         setIsSearching(false);
-
                         setSelectedItem(item);
                         setQuery(item.name);
                         setResults([]);
@@ -156,8 +126,6 @@ const ModalUsingItem = ({
                   ))}
                 </ul>
               )}
-
-              {/* Loader: solo mientras está buscando */}
               {isSearching && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
                   <Loading enableLabel={false} size="loading-sm " />
@@ -165,7 +133,6 @@ const ModalUsingItem = ({
               )}
             </div>
           </div>
-
           <div className="max-w-[100px]">
             <legend className="fieldset-legend text-lg font-normal">
               {t("step4.2")}
@@ -178,7 +145,6 @@ const ModalUsingItem = ({
               min={1}
             />
           </div>
-
           <div className="mt-6">
             <button
               type="button"
@@ -191,7 +157,6 @@ const ModalUsingItem = ({
           </div>
         </div>
 
-        {/* Tabla de ítems */}
         <div className="mb-3 mt-5">
           <table className="table table-fixed w-full">
             <thead>
@@ -221,7 +186,6 @@ const ModalUsingItem = ({
           </table>
         </div>
 
-        {/* Botones de acción */}
         <div className="modal-action flex items-center justify-between">
           <button type="button" className="btn" onClick={onClose}>
             <IoMdClose className="w-[20px] h-[20px] opacity-70" />{" "}

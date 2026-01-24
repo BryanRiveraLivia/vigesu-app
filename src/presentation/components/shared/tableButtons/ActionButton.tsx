@@ -1,11 +1,5 @@
 import React from "react";
-
-interface ActionButtonProps {
-  icon?: React.ReactNode;
-  label?: string;
-  onClick?: () => void;
-  className?: string;
-}
+import { ActionButtonProps } from "./ActionButton.types";
 
 const ActionButton: React.FC<ActionButtonProps> = ({
   icon,

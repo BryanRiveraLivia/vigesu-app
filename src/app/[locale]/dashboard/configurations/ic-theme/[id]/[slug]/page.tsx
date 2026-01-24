@@ -9,21 +9,10 @@ import { DOMAIN } from "@/core/config/constants";
 import { axiosInstance } from "@/core/utils/axiosInstance";
 
 import { useTranslations } from "next-intl";
-
-interface TemplateInspectionItem {
-  templateInspectionId: number;
-  name: string;
-  filePath: string;
-}
-
-interface TemplateInspectionResponse {
-  items: TemplateInspectionItem[];
-  pageNumber: number;
-  totalPages: number;
-  totalCount: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+import {
+  TemplateInspectionItem,
+  TemplateInspectionResponse,
+} from "@/features/inspections/inspection-configuration/types/inspection-config.api";
 
 const Page = () => {
   const pathname = usePathname();
@@ -44,7 +33,7 @@ const Page = () => {
         setError(null);
 
         const { data } = await axiosInstance.get<TemplateInspectionResponse>(
-          "/TemplateInspection"
+          "/TemplateInspection",
         );
 
         if (!isMounted) return;
@@ -64,7 +53,7 @@ const Page = () => {
 
   const match = useMemo(
     () => items.find((it) => it.templateInspectionId === id),
-    [items, id]
+    [items, id],
   );
 
   const pdfUrl = useMemo(() => {

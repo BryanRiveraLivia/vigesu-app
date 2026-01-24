@@ -18,20 +18,7 @@ import AnswerText from "./typeQuest/AnswerText";
 import AnswerOptions from "./typeQuest/AnswerOptions";
 import { IoCloseOutline } from "react-icons/io5";
 import { useTranslations } from "next-intl";
-
-interface ItemWithQuantity {
-  id: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-}
-
-interface ExportedAnswer {
-  response: string;
-  usingItem: boolean;
-  selectedItems: ItemWithQuantity[];
-  subAnswers: ExportedAnswer[];
-}
+import { ItemWithQuantity, ExportedAnswer } from "./GenerateStep3.types";
 
 const GenerateStep3 = () => {
   const t = useTranslations("inspections");
@@ -227,21 +214,6 @@ const GenerateStep3 = () => {
               onClick={() => {
                 const updated = toggleAnswer(selectedTree, answer, parentId);
                 setSelectedTree(updated);
-
-                // IMPORTANTE:
-                // No guardar ni avanzar automáticamente aquí.
-                // La confirmación debe ocurrir únicamente al presionar el botón Save/Continue
-                // y luego elegir la respuesta final en el popup.
-
-                /*  const isRoot = !parentId;
-  if (
-    isRoot &&
-    (isSingle || isMultiple) &&
-    updated.length === 1 &&
-    isLastQuestionInGroup
-  ) {
-    completeCurrentQuestion(updated[0].response);
-  } */
               }}
             >
               <div
@@ -354,14 +326,6 @@ const GenerateStep3 = () => {
     setInitialItems(nodeInTree?.selectedItems ?? []);
     setShowItemModal(true);
   };
-
-  const exportTree = (answers: IFullAnswer[]): ExportedAnswer[] =>
-    answers.map((a) => ({
-      response: a.response,
-      usingItem: a.usingItem,
-      selectedItems: a.selectedItems ?? [],
-      subAnswers: a.subAnswers?.length ? exportTree(a.subAnswers) : [],
-    }));
 
   const completeSign = () => {
     const store = useInspectionFullStore.getState();

@@ -3,13 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { SidebarSectionProps } from "@/core/types/TGeneral";
 import { useSidebarStore } from "@/presentation/stores/useSidebarStore";
-import { useTranslations } from "next-intl";
-
-interface SidebarSectionWithActive extends SidebarSectionProps {
-  activeHref: string | undefined;
-}
+import { SidebarSectionWithActive } from "./SidebarSection.types";
 
 const SidebarSection: React.FC<SidebarSectionWithActive> = ({
   title,
@@ -38,7 +33,7 @@ const SidebarSection: React.FC<SidebarSectionWithActive> = ({
                     "hover:bg-[#ffffff1f] hover:text-white hover:shadow-xl hover:pl-5 transition-all",
                     {
                       "bg-[#ffffff1f] text-white": isActive,
-                    }
+                    },
                   )}
                 >
                   {link.icon && <span className="text-xl">{link.icon}</span>}
