@@ -20,7 +20,7 @@ import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { useTranslations } from "next-intl";
 import { TableListProps } from "./TableList.types";
 
-const TableList = ({ objFilter }: TableListProps) => {
+const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const tToasts = useTranslations("toast");
   const t = useTranslations("inspections");
 
@@ -223,7 +223,7 @@ const TableList = ({ objFilter }: TableListProps) => {
   // ==========================
   useEffect(() => {
     fetchData(currentPage);
-  }, [objFilter, currentPage, rowsPerPage]);
+  }, [objFilter, refreshSignal, currentPage, rowsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);

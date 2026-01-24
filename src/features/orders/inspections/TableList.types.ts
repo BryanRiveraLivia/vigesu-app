@@ -1,4 +1,8 @@
 export interface TableListProps {
-  objFilter: { client: string };
-  refreshSignal: boolean;
+  objFilter: {
+    client: string;
+    status: string;
+    name: string;
+  };
+  refreshSignal?: boolean;
 }
