@@ -3,6 +3,7 @@ import React, { forwardRef, useEffect, useState } from "react";
 import { WorkOrder } from "@/core/types/order/ITypes";
 import { formatDate } from "@/core/utils/utils";
 import { axiosInstance } from "@/core/utils/axiosInstance";
+import { QB_REALM_ID } from "@/core/config/constants";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -24,7 +25,7 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
     const getItemName = async () => {
       try {
         const res = await axiosInstance.get<ItemOption[]>(
-          `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`
+          `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`
         );
 
         const items = res.data ?? [];

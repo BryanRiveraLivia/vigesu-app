@@ -123,7 +123,6 @@ const CreateOrder = () => {
   const handleSubmit = async () => {
     const validation = schema.safeParse(objFilterForm);
     const signatureBlob = signatureRef.current?.getImageBlob();
-    debugger;
     if (!validation.success) {
       toast.error(`${tToasts("error")}: ${tToasts("msj.7")}`);
       return;

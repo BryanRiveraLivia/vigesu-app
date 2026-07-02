@@ -15,13 +15,20 @@
 
 :root {
   font-family: var(--font-jost-sans), sans-serif;
-  --primary-brand-color: hsl(24, 100%, 61%);
+  --font-size-base: 0.8125rem; /* 13px — tamaño compacto de la UI */
+
+  /* Design tokens semánticos — mapean sobre variables de DaisyUI */
+  --brand-primary: var(--color-primary);
+  --sidebar-bg: var(--color-base-200);
+  --card-bg: var(--color-base-100);
+  --text-muted: oklch(60% 0 0);
 }
+
 body,
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-size: 13px !important;
+  font-size: var(--font-size-base);
 }
 
 .container {
@@ -32,13 +39,9 @@ summary::after {
   display: none !important;
 }
 
-.text-lg {
-  font-size: 13px !important;
-}
-
 table tr th,
 table tr td {
-  font-size: 13px;
+  font-size: var(--font-size-base);
 }
 
 .truncate {

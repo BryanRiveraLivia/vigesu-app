@@ -18,7 +18,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
 import { group } from "console";
-import Page from "@/app/[locale]/dashboard/documents/work-orders/edit/page";
+import Page from "../../../../../.agents/app/[locale]/dashboard/documents/work-orders/edit/page";
 import GenerateStep1 from "./GenerateStep1";
 import GenerateStep2 from "./GenerateStep2";
 import GenerateStep3 from "./GenerateStep3";
@@ -39,7 +39,7 @@ const GenerateStep0 = () => {
 
   const [typeOptions, setTypeOptions] = useState<TypeInspectionOption[]>([]);
   const [selectedType, setSelectedType] = useState<TypeInspectionOption | null>(
-    null
+    null,
   );
 
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
@@ -57,11 +57,11 @@ const GenerateStep0 = () => {
         try {
           const response = await axiosInstance.get<CustomerOption[]>(
             `/QuickBooks/Customers/GetCustomerAll?search=${encodeURIComponent(
-              value
-            )}`
+              value,
+            )}`,
           );
           const filtered = (response.data ?? []).filter((item) =>
-            item.name.toLowerCase().startsWith(value.toLowerCase())
+            item.name.toLowerCase().startsWith(value.toLowerCase()),
           );
           setCustomerOptions(filtered);
           setShowCustomerDropdown(true);
@@ -75,7 +75,7 @@ const GenerateStep0 = () => {
         setCustomerOptions([]);
         setShowCustomerDropdown(false);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,10 +114,10 @@ const GenerateStep0 = () => {
   const fetchTypeInspections = async (customerId: string) => {
     try {
       const res = await axiosInstance.get<{ items: TypeInspectionOption[] }>(
-        "/TypeInspection"
+        "/TypeInspection",
       );
       const filtered = res.data.items.filter(
-        (item) => item.customerId == customerId || item.customerId == "0"
+        (item) => item.customerId == customerId || item.customerId == "0",
       );
       setTypeOptions(filtered);
     } catch (err) {
@@ -128,13 +128,13 @@ const GenerateStep0 = () => {
   const handleTypeChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInspectionData(null);
     const found = typeOptions.find(
-      (type) => type.typeInspectionId === parseInt(e.target.value)
+      (type) => type.typeInspectionId === parseInt(e.target.value),
     );
     setSelectedType(found ?? null);
     if (found) {
       try {
         const res = await axiosInstance.get<IFullTypeInspection>(
-          `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${found.typeInspectionId}`
+          `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${found.typeInspectionId}`,
         );
         setInspectionData(res.data);
         console.log("Datos completos de inspección:", res.data);
@@ -149,7 +149,7 @@ const GenerateStep0 = () => {
   const goStep = async (
     typeInspectionId: number,
     groupName: string,
-    groupId: number
+    groupId: number,
   ) => {
     try {
       setIsLoading(true);
@@ -158,13 +158,13 @@ const GenerateStep0 = () => {
       const previous = store.fullInspection;
 
       const res = await axiosInstance.get<IFullTypeInspection>(
-        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
+        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`,
       );
 
       // fusiona respuestas anteriores si existen
       const mergedQuestions = res.data.questions.map((q) => {
         const prev = previous?.questions.find(
-          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId
+          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId,
         );
         return {
           ...q,
@@ -219,7 +219,7 @@ const GenerateStep0 = () => {
         goStep(
           inspectionData.typeInspectionId,
           firstGroup.groupName,
-          firstGroup.groupId
+          firstGroup.groupId,
         );
       }
     }
@@ -337,8 +337,8 @@ const GenerateStep0 = () => {
                   acc[question.groupName].push(question);
                   return acc;
                 },
-                {} as Record<string, IFullQuestion[]>
-              )
+                {} as Record<string, IFullQuestion[]>,
+              ),
             ).map(([groupName, questions]) => {
               const groupId = questions[0]?.groupId;
               return (

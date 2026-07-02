@@ -70,7 +70,6 @@ export default function Home() {
         | string
         | null
         | undefined;
-      debugger;
       if (existingToken && existingToken.trim() !== "") {
         // Ya está todo ok, no hace falta abrir nada
         toast.success("QuickBooks ya estaba conectado.");

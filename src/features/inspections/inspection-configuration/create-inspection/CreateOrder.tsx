@@ -1,7 +1,7 @@
 //  Nuevo formulario con Zod y react-hook-form para validación cruzada
 "use client";
 
-import { COMPANY_INFO } from "@/core/config/constants";
+import { COMPANY_INFO, QB_REALM_ID } from "@/core/config/constants";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { z } from "zod";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
@@ -92,7 +92,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   // Handle Customer Input
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);

@@ -1,0 +1,6 @@
+// app/[lang]/dashboard/catalogs/page.tsx
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("./documents/work-orders");
+}

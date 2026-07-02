@@ -10,19 +10,18 @@ const intlMiddleware = createMiddleware(routing);
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("auth-token")?.value;
   const pathname = request.nextUrl.pathname;
-  const hasPreviewFlag = request.nextUrl.searchParams.has("preview");
 
   const isProtected = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  // ⚠️ Si está protegida pero tiene ?preview => permitir acceso (para PDF)
-  if (isProtected && !token && hasPreviewFlag) {
-    return intlMiddleware(request);
-  }
-
-  // 🔒 Si está protegida y no hay token, redirigir
+  // Permitir acceso sin cookie solo si el preview token secreto coincide
   if (isProtected && !token) {
+    const previewToken = request.nextUrl.searchParams.get("preview");
+    const secret = process.env.PREVIEW_SECRET;
+    if (secret && previewToken === secret) {
+      return intlMiddleware(request);
+    }
     const loginUrl = new URL("/", request.url);
     return NextResponse.redirect(loginUrl);
   }

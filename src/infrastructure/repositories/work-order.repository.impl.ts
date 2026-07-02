@@ -45,8 +45,8 @@ export class WorkOrderRepositoryImpl implements IWorkOrderRepository {
         "/WorkOrder",
       );
       return response.data.totalCount ?? 0;
-    } catch (error) {
-      console.error(error);
+    } catch (error: unknown) {
+      console.warn("API Error:", error instanceof Error ? error.message : String(error));
       return 0;
     }
   }

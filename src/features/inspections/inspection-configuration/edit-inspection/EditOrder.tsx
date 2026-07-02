@@ -13,6 +13,7 @@ import FormChassi from "../types-pdf/FormChassiEdit/FormChassi";
 import { debounce } from "lodash";
 import type { DebouncedFunc } from "lodash";
 import { axiosInstance } from "@/core/utils/axiosInstance";
+import { QB_REALM_ID } from "@/core/config/constants";
 import { CustomerOption } from "@/core/utils/orderMapper";
 import {
   ExportedAnswer,
@@ -257,7 +258,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   // Handle Customer Input
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
@@ -299,7 +300,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
     const res = await axiosInstance.get<CustomerIdRes>(
-      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=${QB_REALM_ID}`
     );
     return res.data?.name ?? "";
   };

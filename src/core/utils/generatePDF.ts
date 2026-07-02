@@ -1,6 +1,6 @@
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
-import { useLoadingStore } from "@/presentation/stores/useLoadinStore";
+import { useLoadingStore } from "@/presentation/stores/useLoadingStore";
 
 export const generatePDF = async (
   elementId: string,

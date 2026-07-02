@@ -1,11 +1,13 @@
 import { useAuthStore } from "@/presentation/stores/useAuthStore";
+import { getCookie } from "cookies-next";
 
 export const useAuthUser = () => {
   const user = useAuthStore((state) => state.user);
-  const token = useAuthStore((state) => state.token);
+  // El token vive en la cookie httpOnly, no en el store
+  const token = getCookie("auth-token") as string | undefined;
 
   return {
-    token,
+    token: token ?? null,
     isAuthenticated: !!token && !!user,
     user,
 

@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { COMPANY_INFO } from "@/core/config/constants";
+import { COMPANY_INFO, QB_REALM_ID } from "@/core/config/constants";
 import React, { FC, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
@@ -121,7 +121,7 @@ const EditOrder = () => {
 
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -161,7 +161,7 @@ const EditOrder = () => {
 
   const searchMechanic = async (name?: string) => {
     try {
-      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -201,7 +201,7 @@ const EditOrder = () => {
 
   const searchItem = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -256,7 +256,7 @@ const EditOrder = () => {
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
     const res = await axiosInstance.get(
-      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`,
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=${QB_REALM_ID}`,
     );
     return res.data?.name ?? "";
   };
@@ -264,7 +264,7 @@ const EditOrder = () => {
   const getMechanicName = async (mechanicId: string) => {
     if (!mechanicId) return "";
     const res = await axiosInstance.get(
-      `/QuickBooks/Employees/GetEmployeeId?EmployeeId=${mechanicId}&RealmId=9341454759827689`,
+      `/QuickBooks/Employees/GetEmployeeId?EmployeeId=${mechanicId}&RealmId=${QB_REALM_ID}`,
     );
     return res.data?.name ?? "";
   };
@@ -281,7 +281,7 @@ const EditOrder = () => {
       const fetchItemName = async (itemId: number): Promise<string> => {
         if (!itemId) return "";
         const response = await axiosInstance.get(
-          `/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=9341454759827689`,
+          `/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=${QB_REALM_ID}`,
         );
         return response.data?.name ?? "";
       };

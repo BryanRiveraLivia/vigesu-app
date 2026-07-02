@@ -8,6 +8,7 @@ import Loading from "@/presentation/components/shared/Loading";
 import { FaRegEye } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { getInspections } from "./api/inspectionApi";
+import { QB_REALM_ID } from "@/core/config/constants";
 import { IInspectionItem } from "./models/inspection.types";
 import { formatDate } from "@/core/utils/utils";
 import { axiosInstance } from "@/core/utils/axiosInstance";
@@ -101,10 +102,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     const formData = new FormData();
     formData.append("QuickBookEstimateId", quickBookEstimateId);
     formData.append("FilePdf", file);
-    formData.append("RealmId", "9341454759827689");
+    formData.append("RealmId", QB_REALM_ID);
 
     await axiosInstance.post(
-      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+      `/QuickBooks/estimates/attachmentPDF?RealmId=${QB_REALM_ID}`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } },
     );
@@ -125,10 +126,10 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     const formData = new FormData();
     formData.append("QuickBookEstimateId", quickBookEstimateId);
     formData.append("FilePdf", file);
-    formData.append("RealmId", "9341454759827689");
+    formData.append("RealmId", QB_REALM_ID);
 
     await axiosInstance.post(
-      "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+      `/QuickBooks/estimates/attachmentPDF?RealmId=${QB_REALM_ID}`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } },
     );

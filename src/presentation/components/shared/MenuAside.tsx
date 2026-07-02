@@ -18,22 +18,20 @@ import { FC, useEffect, useState } from "react";
 import { useSidebarStore } from "../../stores/useSidebarStore";
 import { IoCloseOutline } from "react-icons/io5";
 import { generalReactClass } from "@/core/types/TGeneral";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { HiOutlineServer } from "react-icons/hi2";
 import { getTotalWorkOrdersUseCase } from "@/core/di/container";
 import { useAuthUser } from "@/presentation/stores/useAuthUser";
 import { getInspections } from "@/features/orders/inspections/api/inspectionApi";
 import Loading from "./Loading";
 import { getInitials } from "@/core/utils/utils";
-import { useAuthStore } from "@/presentation/stores/useAuthStore";
+import { performLogout } from "@/core/utils/logout";
 import { TbDeviceTabletCheck } from "react-icons/tb";
 import { useTranslations } from "next-intl";
 
 const MenuAside: FC<generalReactClass> = ({ className }) => {
   const t = useTranslations("aside");
   const tLogout = useTranslations("logout");
-  const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
   const { userName, employeeName, rol } = useAuthUser();
   const isSidebarOpen = useSidebarStore((state) => state.isSidebarOpen);
   const closeSidebar = useSidebarStore((state) => state.closeSidebar);
@@ -107,18 +105,27 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
       .sort((a, b) => b.href.length - a.href.length)[0]?.href ?? undefined;
 
   const handleLogout = () => {
-    logout();
-    router.push("/");
+    performLogout();
   };
 
   useEffect(() => {
     const fetchTotal = async () => {
-      const count = await getTotalWorkOrdersUseCase.execute();
-      setTotalOrders(count ?? 0);
+      try {
+        const count = await getTotalWorkOrdersUseCase.execute();
+        setTotalOrders(count ?? 0);
+      } catch (error: unknown) {
+        console.warn("API Error (orders):", error instanceof Error ? error.message : String(error));
+        setTotalOrders(0);
+      }
     };
     const fetchTotalInspections = async () => {
-      const response = await getInspections({ PageNumber: 1, PageSize: 10 });
-      setTotalInspections(response.totalCount ?? 0);
+      try {
+        const response = await getInspections({ PageNumber: 1, PageSize: 10 });
+        setTotalInspections(response.totalCount ?? 0);
+      } catch (error: unknown) {
+        console.warn("API Error (inspections):", error instanceof Error ? error.message : String(error));
+        setTotalInspections(0);
+      }
     };
 
     setTimeout(() => {
@@ -199,7 +206,7 @@ const MenuAside: FC<generalReactClass> = ({ className }) => {
                   </span>
                 </div>
               )}
-              <TbPointFilled className="text-xs text-shadow-emerald-800" />
+              <TbPointFilled className="text-xs text-emerald-800" />
 
               {totalOrders && totalOrders > 0 ? (
                 <div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getWorkOrdersUseCase } from "@/core/di/container";
+import { QB_REALM_ID } from "@/core/config/constants";
+import { getErrorMessage } from "@/core/utils/errorMessage";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegEye } from "react-icons/fa";
@@ -93,17 +95,17 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
       const formData = new FormData();
       formData.append("QuickBookEstimateId", String(quickBookEstimatedId));
       formData.append("FilePdf", file);
-      formData.append("RealmId", "9341454759827689");
+      formData.append("RealmId", QB_REALM_ID);
 
       await axiosInstance.post(
-        "/QuickBooks/estimates/attachmentPDF?RealmId=9341454759827689",
+        `/QuickBooks/estimates/attachmentPDF?RealmId=${QB_REALM_ID}`,
         formData,
       );
 
       toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(`${tToasts("error")}: ${err}`);
+      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
     }
   };
 
@@ -126,8 +128,8 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
 
       setAllData(response.items ?? []);
       setTotalRecords(response.totalCount ?? 0);
-    } catch (error) {
-      toast.error(`${tToasts("error")}: ${error}`);
+    } catch (error: unknown) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(error)}`);
     } finally {
       setLoading(false);
     }
@@ -140,12 +142,15 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     workOrderId: number,
     statusWorkOrder: number = WorkOrderStatus.Disabled,
   ) => {
-    await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
-      workOrderId,
-      statusWorkOrder,
-    });
-
-    fetchData(currentPage);
+    try {
+      await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
+        workOrderId,
+        statusWorkOrder,
+      });
+      await fetchData(currentPage);
+    } catch (error: unknown) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(error)}`);
+    }
   };
 
   // ==========================
