@@ -12,19 +12,13 @@ const BackButton: FC<BackButtonProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const pageTitle = usePageTitle();
-  const [parentPath, setParentPath] = useState<string | null>(null);
 
-  useEffect(() => {
-    const segments = pathname.split("/").filter(Boolean);
-    const dashboardIndex = segments.findIndex((s) => s === "dashboard");
-
-    if (dashboardIndex === -1 || segments.length <= dashboardIndex + 1) {
-      setParentPath(null);
-    } else {
-      const newPath = "/" + segments.slice(0, segments.length - 1).join("/");
-      setParentPath(newPath);
-    }
-  }, [pathname]);
+  const segments = pathname.split("/").filter(Boolean);
+  const dashboardIndex = segments.findIndex((s) => s === "dashboard");
+  const parentPath: string | null =
+    dashboardIndex === -1 || segments.length <= dashboardIndex + 1
+      ? null
+      : "/" + segments.slice(0, segments.length - 1).join("/");
 
   const handleBack = () => {
     if (link) {

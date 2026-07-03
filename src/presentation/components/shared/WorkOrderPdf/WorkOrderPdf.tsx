@@ -22,37 +22,25 @@ const WorkOrderPdf = forwardRef<HTMLDivElement, Props>(
   ({ data, isEditable }, ref) => {
     const [getItem, setGetItem] = useState<ItemOption[]>([]);
     const tToasts = useTranslations("toast");
-    const getItemName = async () => {
-      try {
-        const res = await axiosInstance.get<ItemOption[]>(
-          `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`
-        );
-
-        const items = res.data ?? [];
-
-        // defensivo: validar que existan los datos de workOrderDetails
-        const woItemId = data?.workOrderDetails?.[0]?.itemId;
-        if (woItemId == null) {
-          console.warn("workOrderDetails[0].itemId no existe");
-          return items;
-        }
-
-        // si id es string y itemId es number, normaliza:
-        const match = items.find((it) => String(it.id) === String(woItemId));
-        // o si quieres varios:
-        // const matches = items.filter(it => String(it.id) === String(woItemId));
-
-        console.log("match:", match);
-        setGetItem(items);
-      } catch (error) {
-        console.error("Error fetching template data:", error);
-        toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
-        return [];
-      }
-    };
 
     useEffect(() => {
-      getItemName();
+      let cancelled = false;
+      axiosInstance
+        .get<ItemOption[]>(
+          `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`
+        )
+        .then((res) => {
+          if (!cancelled) setGetItem(res.data ?? []);
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            console.error("Error fetching template data:", error);
+            toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
+          }
+        });
+      return () => {
+        cancelled = true;
+      };
     }, []);
 
     return (

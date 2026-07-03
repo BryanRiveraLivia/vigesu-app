@@ -40,6 +40,12 @@ interface Props {
   };
 }
 
+let localIdCounter = 0;
+const genId = () => {
+  localIdCounter += 1;
+  return `n_${localIdCounter}_modal`;
+};
+
 const InspectionModal: React.FC<Props> = ({
   onClose,
   onSave,
@@ -55,10 +61,6 @@ const InspectionModal: React.FC<Props> = ({
   >([]);
   const [selectedQuestion, setSelectedQuestion] =
     useState<TemplateInspectionQuestion | null>(null);
-  const hasAppliedInitial = useRef(false);
-
-  const genId = () => `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-
   // ✅ FIX: conservar usePrint al normalizar
   const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
     (nodes ?? []).map((n) => ({
@@ -89,56 +91,27 @@ const InspectionModal: React.FC<Props> = ({
       .catch((err) => console.error("Error al cargar preguntas:", err));
   }, [templateId]);
 
-  // aplicar prellenado (una sola vez)
-  useEffect(() => {
-    if (hasAppliedInitial.current) return;
-    if (initialData) {
-      setQuestion(initialData.question ?? "");
-      setAnswers(ensureAnswerIds(initialData.answers ?? [])); // <-- conserva usePrint
-
-      if (groups.length > 0) {
-        const g =
-          groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
-        if (g) setSelectedGroup(g);
-      }
-
-      if (questionSuggestions.length > 0) {
-        const q = questionSuggestions.find(
-          (qq) =>
-            qq.templateInspectionQuestionId ===
-            initialData.selectedQuestion.templateInspectionQuestionId
-        );
-        if (q) setSelectedQuestion(q);
-      }
-
-      hasAppliedInitial.current = true;
-    }
-  }, [
-    initialData,
-    groups.length,
-    questionSuggestions.length,
-    groups,
-    questionSuggestions,
-  ]);
-
-  // si llegan luego
-  useEffect(() => {
-    if (!initialData || selectedGroup || groups.length === 0) return;
+  // Prefill del formulario cuando todos los datos estén listos (render-time derived state)
+  const [formInitialized, setFormInitialized] = useState(false);
+  if (
+    !formInitialized &&
+    initialData &&
+    groups.length > 0 &&
+    questionSuggestions.length > 0
+  ) {
+    setFormInitialized(true);
+    setQuestion(initialData.question ?? "");
+    setAnswers(ensureAnswerIds(initialData.answers ?? []));
     const g =
       groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
     if (g) setSelectedGroup(g);
-  }, [groups, initialData, selectedGroup]);
-
-  useEffect(() => {
-    if (!initialData || selectedQuestion || questionSuggestions.length === 0)
-      return;
     const q = questionSuggestions.find(
       (qq) =>
         qq.templateInspectionQuestionId ===
         initialData.selectedQuestion.templateInspectionQuestionId
     );
     if (q) setSelectedQuestion(q);
-  }, [questionSuggestions, initialData, selectedQuestion]);
+  }
 
   const addAnswer = () => {
     setAnswers((prev) => [

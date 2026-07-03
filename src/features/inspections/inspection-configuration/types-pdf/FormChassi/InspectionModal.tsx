@@ -42,6 +42,12 @@ interface Props {
   };
 }
 
+let localIdCounter = 0;
+const genId = () => {
+  localIdCounter += 1;
+  return `n_${localIdCounter}_modal`;
+};
+
 const InspectionModal: React.FC<Props> = ({
   onClose,
   onSave,
@@ -59,13 +65,6 @@ const InspectionModal: React.FC<Props> = ({
   >([]);
   const [selectedQuestion, setSelectedQuestion] =
     useState<TemplateInspectionQuestion | null>(null);
-
-  // flags para aplicar partes del prefill exactamente una vez CUANDO haya data
-  const appliedBaseRef = useRef(false);
-  const appliedGroupRef = useRef(false);
-  const appliedQuestionRef = useRef(false);
-
-  const genId = () => `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
   const ensureAnswerIds = (nodes: AnswerNode[]): AnswerNode[] =>
     (nodes ?? []).map((n) => ({
@@ -98,34 +97,20 @@ const InspectionModal: React.FC<Props> = ({
       .catch((err) => console.error("Error al cargar preguntas:", err));
   }, [templateId]);
 
-  // 1) Prefill base (texto y respuestas) apenas hay initialData
-  useEffect(() => {
-    if (appliedBaseRef.current) return;
-    if (!initialData) return;
-
+  // Prefill del formulario cuando todos los datos estén listos (render-time derived state)
+  const [formInitialized, setFormInitialized] = useState(false);
+  if (
+    !formInitialized &&
+    initialData &&
+    groups.length > 0 &&
+    questionSuggestions.length > 0
+  ) {
+    setFormInitialized(true);
     setQuestion(initialData.question ?? "");
     setAnswers(ensureAnswerIds(initialData.answers ?? []));
-    appliedBaseRef.current = true;
-  }, [initialData]);
-
-  // 2) Resolver selección de grupo CUANDO existan grupos
-  useEffect(() => {
-    if (appliedGroupRef.current) return;
-    if (!initialData) return;
-    if (groups.length === 0) return;
-
     const g =
       groups.find((gr) => gr.groupId === initialData.group.groupId) || null;
     if (g) setSelectedGroup(g);
-    appliedGroupRef.current = true;
-  }, [groups, initialData]);
-
-  // 3) Resolver selección de pregunta CUANDO existan sugerencias
-  useEffect(() => {
-    if (appliedQuestionRef.current) return;
-    if (!initialData) return;
-    if (questionSuggestions.length === 0) return;
-
     const q = questionSuggestions.find(
       (qq) =>
         qq.templateInspectionQuestionId ===
@@ -133,10 +118,9 @@ const InspectionModal: React.FC<Props> = ({
     );
     if (q) {
       setSelectedQuestion(q);
-      setQuestion(q.question); // sincroniza el input con el label real
+      setQuestion(q.question);
     }
-    appliedQuestionRef.current = true;
-  }, [questionSuggestions, initialData]);
+  }
 
   const addAnswer = () => {
     setAnswers((prev) => [

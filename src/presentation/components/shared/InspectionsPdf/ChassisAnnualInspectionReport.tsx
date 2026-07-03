@@ -1687,7 +1687,7 @@ Long or Short? (Circle)`}
               <td className="border p-2 text-center">
                 {matchById(251)?.detail?.finalResponse}
               </td>
-            </tr>{" "}
+            </tr>
             <tr className="h-[47px]">
               <td className="border p-2 text-center">
                 {matchById(247)?.detail?.finalResponse}

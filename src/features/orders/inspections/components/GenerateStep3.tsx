@@ -38,12 +38,14 @@ const GenerateStep3 = () => {
   const [showRootPicker, setShowRootPicker] = useState(false);
   const [selectedRootId, setSelectedRootId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [prevResetTrigger, setPrevResetTrigger] = useState(resetTrigger);
+  if (resetTrigger !== prevResetTrigger) {
+    setPrevResetTrigger(resetTrigger);
     setSelectedTree([]);
     setTextResponse("");
     setSignUrl(undefined);
     setIsSignValid(false);
-  }, [resetTrigger]);
+  }
 
   const originalRoots = fullQuestion?.originalAnswers ?? [];
   const currentAnswers =
@@ -464,18 +466,32 @@ const GenerateStep3 = () => {
         q.typeInspectionDetailId === fullQuestion?.typeInspectionDetailId,
     );
 
-  useEffect(() => {
+  const [prevQuestionDetailId, setPrevQuestionDetailId] = useState<
+    number | undefined
+  >();
+  const currentQuestionDetailId = fullQuestion?.typeInspectionDetailId;
+
+  if (
+    currentQuestionDetailId !== undefined &&
+    currentQuestionDetailId !== prevQuestionDetailId
+  ) {
+    setPrevQuestionDetailId(currentQuestionDetailId);
     if (!fullQuestion || !fullInspection) return;
 
     const q = fullInspection.questions.find(
-      (qq) => qq.typeInspectionDetailId === fullQuestion.typeInspectionDetailId,
+      (qq) =>
+        qq.typeInspectionDetailId === currentQuestionDetailId,
     );
 
     if (q && !q.originalAnswers && fullQuestion.answers) {
-      q.originalAnswers = structuredClone(fullQuestion.answers);
-    }
-    if (q?.originalAnswers) {
-      fullQuestion.originalAnswers = q.originalAnswers;
+      const updatedQuestions = fullInspection.questions.map((qq) =>
+        qq.typeInspectionDetailId === currentQuestionDetailId
+          ? { ...qq, originalAnswers: structuredClone(fullQuestion.answers) }
+          : qq,
+      );
+      useInspectionFullStore
+        .getState()
+        .setFullInspection({ ...fullInspection, questions: updatedQuestions });
     }
 
     const alreadyAnswered = q?.statusInspectionConfig;
@@ -496,7 +512,7 @@ const GenerateStep3 = () => {
       setSignUrl("");
       setIsSignValid(false);
     }
-  }, [fullQuestion?.typeInspectionDetailId]);
+  }
 
   return (
     <>

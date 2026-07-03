@@ -251,7 +251,7 @@ const AnnualVehicleInspectionReport90DaysBit: FC<Props> = ({
           </span>
         </div>
         <div className="p-1.5 flex flex-col justify-between min-h-[42px]">
-          <span className="font-bold uppercase text-gray-600">INSPECTOR'S NAME (PRINT OR TYPE)</span>
+          <span className="font-bold uppercase text-gray-600">INSPECTOR&apos;S NAME (PRINT OR TYPE)</span>
           <span className="font-semibold text-xs text-black px-1">
             {matchById(605)?.detail?.finalResponse || "—"}
           </span>

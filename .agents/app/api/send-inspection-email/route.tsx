@@ -14,6 +14,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const result = bodySchema.safeParse(await req.json());
+  if (!result.success) {
+    return NextResponse.json(
+      { error: result.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const { email, name } = result.data;
+  const emailComponent = <EmailTemplate recipientName={name} />;
+
   try {
     const apiKey = process.env.RESEND_API_KEY;
 
@@ -25,22 +36,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = bodySchema.safeParse(await req.json());
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error.issues },
-        { status: 400 }
-      );
-    }
-
-    const { email, name } = result.data;
     const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({
       from: "Inspections <onboarding@resend.dev>",
       to: [email],
       subject: "Confirmación de Inspección",
-      react: <EmailTemplate recipientName={name} />,
+      react: emailComponent,
     });
 
     if (error) {

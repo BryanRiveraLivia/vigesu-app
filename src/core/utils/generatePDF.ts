@@ -23,11 +23,10 @@ export const generatePDF = async (
     // ✅ Remover clases que restrinjan max-width o añadan márgenes excesivos en el PDF (.container, my-5, etc.)
     clone.classList.remove("container", "min-h-screen", "my-5", "my-4", "my-6", "mx-auto");
 
-    // ✅ Usamos 1024px para que todos los breakpoints responsivos de escritorio (md: y lg:) estén activos
-    // y para que la tabla ocupe el 100% del ancho sin márgenes en blanco en los extremos
-    clone.style.width = "1024px";
-    clone.style.minWidth = "1024px";
-    clone.style.maxWidth = "1024px";
+    // ✅ Usamos 794px (ancho estándar A4 a 96 DPI) para evitar que el navegador reduzca un 30% la escala y achique la letra
+    clone.style.width = "794px";
+    clone.style.minWidth = "794px";
+    clone.style.maxWidth = "794px";
     clone.style.height = "auto";
     clone.style.maxHeight = "none";
     clone.style.overflow = "visible";
@@ -48,7 +47,6 @@ export const generatePDF = async (
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
-      windowWidth: 1024,
     });
 
     const imgData = canvas.toDataURL("image/jpeg", 0.95); // Usamos JPEG para reducir peso si es muy grande
@@ -63,15 +61,21 @@ export const generatePDF = async (
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    // El ancho de la imagen en el PDF será el ancho total del PDF
-    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    // ✅ Márgenes de página ligeros (10pt ~ 5.8mm) para que quede alineado con el encabezado de fecha superior
+    const marginX = 10;
+    const marginY = 10;
+    const contentWidth = pdfWidth - marginX * 2;
+    const contentHeight = pdfHeight - marginY * 2;
 
-    if (imgHeight <= pdfHeight) {
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, imgHeight);
+    // El ancho de la imagen en el PDF será contentWidth, preservando la proporción
+    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+    if (imgHeight <= contentHeight) {
+      pdf.addImage(imgData, "JPEG", marginX, marginY, contentWidth, imgHeight);
     } else {
       let y = 0;
-      // Definimos el alto de corte basado en la proporción de la página
-      const pageHeightInCanvas = (canvas.width * pdfHeight) / pdfWidth;
+      // Definimos el alto de corte en el canvas basado en la proporción del área imprimible de la página
+      const pageHeightInCanvas = (canvas.width * contentHeight) / contentWidth;
 
       while (y < canvas.height) {
         const pageCanvas = document.createElement("canvas");
@@ -92,13 +96,14 @@ export const generatePDF = async (
         );
 
         const pageData = pageCanvas.toDataURL("image/jpeg", 0.95);
+        const chunkHeight = (pageCanvas.height * contentWidth) / pageCanvas.width;
         pdf.addImage(
           pageData,
           "JPEG",
-          0,
-          0,
-          pdfWidth,
-          (pageCanvas.height * pdfWidth) / pageCanvas.width,
+          marginX,
+          marginY,
+          contentWidth,
+          chunkHeight,
         );
 
         y += pageCanvas.height;

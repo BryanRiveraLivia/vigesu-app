@@ -390,7 +390,7 @@ crossmembers above slider rail**`}
       </div>
       <div className="my-5 flex flex-col gap-5 ">
         <div className="flex flex-col gap-2 ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1 gap-2 items-center justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 flex-1 gap-2 items-center justify-center">
             <BoxData
               title="RFO"
               label1="Brand:"
@@ -475,7 +475,7 @@ crossmembers above slider rail**`}
 
             <BoxDataSmall label1="RDA /8ths" data1={getAnswerValue(68)} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1 gap-2 items-center justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 flex-1 gap-2 items-center justify-center">
             <BoxDataSmall label1="RF /8ths" data1={getAnswerValue(69)} />
             <BoxDataSmall label1="RC /8ths" data1={getAnswerValue(70)} />
             <BoxDataSmall label1="RR /8ths" data1={getAnswerValue(71)} />

@@ -19,6 +19,12 @@ import { generatePDF } from "@/core/utils/generatePDF";
 import RenderComponentByNumber from "@/presentation/components/shared/InspectionsPdf/RenderComponentByNumber";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import {
+  CARGAR_DEMO,
+  DEMO_TEMPLATES,
+  getDemoTemplateData,
+  getDemoInspectionDetails,
+} from "@/features/orders/inspections/utils/demoData";
 
 const GeneratePdfPage = () => {
   const tToasts = useTranslations("toast");
@@ -44,18 +50,18 @@ const GeneratePdfPage = () => {
     documentTitle: `Inspection - ${templateData?.name ?? "Inspection"}`,
 
     pageStyle: `
-    @page { size: auto; margin: 10mm; }
+    @page { size: auto; margin: 5mm; }
     @media print {
       html, body { 
         -webkit-print-color-adjust: exact !important; 
         print-color-adjust: exact !important; 
-        width: 1024px !important;
-        min-width: 1024px !important;
+        width: 794px !important;
+        min-width: 794px !important;
       }
       #pdf-content {
-        width: 1024px !important;
-        min-width: 1024px !important;
-        max-width: 1024px !important;
+        width: 794px !important;
+        min-width: 794px !important;
+        max-width: 794px !important;
         margin: 0 auto !important;
         padding: 0 !important;
         overflow: visible !important;
@@ -66,6 +72,27 @@ const GeneratePdfPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const numInspId = Number(inspectionId);
+      const numTempId = Number(templateInspectionId);
+
+      if (CARGAR_DEMO && numInspId < 0) {
+        setTemplateData(getDemoTemplateData(numTempId));
+        setInspectionData({
+          inspectionId: numInspId,
+          inspectionNumber: `DEMO-${String(numTempId).padStart(3, "0")}`,
+          typeInspectionId: 1,
+          templateInspectionId: numTempId,
+          customerId: "1",
+          employeeId: "1",
+          customerName: `Demo Client (${DEMO_TEMPLATES[numTempId] || "Template"})`,
+          employeeName: "Demo Inspector AI",
+          dateOfInspection: new Date().toISOString(),
+          inspectionDetails: getDemoInspectionDetails(numTempId),
+          inspectionPhotos: [],
+        });
+        return;
+      }
+
       try {
         const [resTemplate, resInspection] = await Promise.allSettled([
           axiosInstance.get(
@@ -78,12 +105,28 @@ const GeneratePdfPage = () => {
 
         if (resTemplate.status === "fulfilled") {
           setTemplateData(resTemplate.value.data);
+        } else if (CARGAR_DEMO) {
+          setTemplateData(getDemoTemplateData(numTempId));
         } else {
           toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
         }
 
         if (resInspection.status === "fulfilled") {
           setInspectionData(resInspection.value.data);
+        } else if (CARGAR_DEMO) {
+          setInspectionData({
+            inspectionId: numInspId,
+            inspectionNumber: `DEMO-${String(numTempId).padStart(3, "0")}`,
+            typeInspectionId: 1,
+            templateInspectionId: numTempId,
+            customerId: "1",
+            employeeId: "1",
+            customerName: `Demo Client (${DEMO_TEMPLATES[numTempId] || "Template"})`,
+            employeeName: "Demo Inspector AI",
+            dateOfInspection: new Date().toISOString(),
+            inspectionDetails: getDemoInspectionDetails(numTempId),
+            inspectionPhotos: [],
+          });
         }
       } catch (error) {
         toast.error(`${tToasts("error")}: ${error}`);

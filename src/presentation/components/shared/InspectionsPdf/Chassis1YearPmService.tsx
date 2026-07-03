@@ -237,7 +237,7 @@ const Chassis1YearPmService: FC<Props> = ({
           </span>
         </div>
         <div className="border-b md:border-b-0 md:border-r border-black p-1 flex flex-col justify-between min-h-[44px]">
-          <span className="font-bold uppercase text-[9px]">MECHANIC'S NAME (PRINT)</span>
+          <span className="font-bold uppercase text-[9px]">MECHANIC&apos;S NAME (PRINT)</span>
           <span className="font-semibold text-sm text-black px-1 capitalize">
             {matchById(706)?.detail?.finalResponse || "—"}
           </span>

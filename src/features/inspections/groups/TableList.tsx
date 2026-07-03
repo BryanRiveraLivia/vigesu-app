@@ -30,6 +30,13 @@ const TableList = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10); // Could be dynamic if needed
 
+  const [filterKey, setFilterKey] = useState("");
+  const nextFilterKey = JSON.stringify({ objFilter, rowsPerPage });
+  if (nextFilterKey !== filterKey) {
+    setFilterKey(nextFilterKey);
+    setCurrentPage(1);
+  }
+
   const [showModal, setShowModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
@@ -44,13 +51,7 @@ const TableList = ({
   // Effect to trigger refresh when parent asks (refreshFlag changes)
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshFlag]);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [objFilter, rowsPerPage]);
 
   const handleSuccess = () => {
     setSelectedGroup(null);

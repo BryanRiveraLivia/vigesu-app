@@ -1418,8 +1418,8 @@ const InspectionTTN: React.FC<PropsPDF> = ({
                 </div>
               </div>
             </div>
-            <div className="w-full items-center justify-center xl:w-1/2 flex flex-col lg:flex-row border-t-[1px] xl:border-t-0 xl:border-l-[1px] ">
-              <div className="w-full lg:w-1/2 h-full border-r-0 lg:border-r-[1px]">
+            <div className="w-full items-center justify-center xl:w-1/2 flex flex-col md:flex-row border-t-[1px] xl:border-t-0 xl:border-l-[1px] ">
+              <div className="w-full md:w-1/2 h-full border-r-0 md:border-r-[1px]">
                 <p className="font-bold text-xl text-center border-b-[1px] p-2">
                   DO NOT RELEASE UNIT UNTIL REPAIRS ARE MADE
                 </p>
@@ -1447,7 +1447,7 @@ const InspectionTTN: React.FC<PropsPDF> = ({
                   </div>
                 </div>
               </div>
-              <div className="w-full lg:w-1/2 h-full flex items-center justify-center flex-col gap-4   p-6 lg:p-2 border-t-[1px] lg:border-t-0">
+              <div className="w-full md:w-1/2 h-full flex items-center justify-center flex-col gap-4   p-6 md:p-2 border-t-[1px] md:border-t-0">
                 <p className="text-3xl font-bold text-center">
                   INSPECTION STATUS
                 </p>
@@ -1577,10 +1577,7 @@ interface MarkTireChartProps {
 }
 
 const MarkTireChart: FC<MarkTireChartProps> = ({ number, active }) => {
-  const [enable, setEnable] = useState<boolean>(false);
-  useEffect(() => {
-    setEnable(active);
-  }, []);
+  const [enable, setEnable] = useState<boolean>(active);
 
   return (
     <div

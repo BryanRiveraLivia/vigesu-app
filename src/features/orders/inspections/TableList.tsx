@@ -20,6 +20,7 @@ import clsx from "clsx";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { useTranslations } from "next-intl";
 import { TableListProps } from "./TableList.types";
+import { CARGAR_DEMO, getDemoInspectionsList } from "./utils/demoData";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const tToasts = useTranslations("toast");
@@ -74,8 +75,25 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         Name: objFilter.name,
       });
 
-      setAllData(items ?? []);
-      setTotalCount(total ?? 0);
+      let finalItems = items ?? [];
+      let finalTotal = total ?? 0;
+
+      if (CARGAR_DEMO) {
+        const demoItems = getDemoInspectionsList();
+        const filteredDemo = demoItems.filter((d) => {
+          if (!objFilter.name && !objFilter.client) return true;
+          const search = (objFilter.name || objFilter.client).toLowerCase();
+          return (
+            d.customerName.toLowerCase().includes(search) ||
+            d.inspectionNumber.toLowerCase().includes(search)
+          );
+        });
+        finalItems = [...filteredDemo, ...finalItems];
+        finalTotal += filteredDemo.length;
+      }
+
+      setAllData(finalItems);
+      setTotalCount(finalTotal);
     } catch (error) {
       console.error(error);
       toast.error(`${tToasts("error")}: ${tToasts("msj.21")}`);
@@ -139,6 +157,25 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
     inspectionId: number,
     syncOnlyEstimate = false,
   ) => {
+    if (inspectionId < 0) {
+      setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
+      setTimeout(() => {
+        setSyncStatus((prev) => {
+          const updated = { ...prev };
+          delete updated[inspectionId];
+          return updated;
+        });
+        setAllData((prev) =>
+          prev.map((item) =>
+            item.inspectionId === inspectionId
+              ? { ...item, statusInspection: TypeInspectionOrders.SyncQuickbook }
+              : item
+          )
+        );
+        toast.success(`${tToasts("ok")}: ${tToasts("msj.14")} (DEMO)`);
+      }, 800);
+      return;
+    }
     setSyncStatus((prev) => ({ ...prev, [inspectionId]: "loading" }));
     try {
       // 1) Crear WorkOrder desde la inspección
@@ -200,6 +237,12 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   // 🔹 DELETE
   // ==========================
   const deleteTypeInspection = async (inspectionId: number) => {
+    if (inspectionId < 0) {
+      setAllData((prev) => prev.filter((item) => item.inspectionId !== inspectionId));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.23")} (DEMO)`);
+      return;
+    }
     try {
       const payload = {
         inspectionId,

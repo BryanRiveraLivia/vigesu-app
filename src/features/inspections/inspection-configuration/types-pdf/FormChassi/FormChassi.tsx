@@ -40,6 +40,12 @@ interface FormChassiProps {
 
 const STATUS_ACTIVE = InspectionStatus.Active;
 
+let localIdCounter = 0;
+const newLocalId = () => {
+  localIdCounter += 1;
+  return `n_${localIdCounter}`;
+};
+
 const FormChassi: React.FC<FormChassiProps> = ({
   onQuestionsChange,
   templateName,
@@ -64,9 +70,6 @@ const FormChassi: React.FC<FormChassiProps> = ({
       typeQuestion: number;
     };
   } | null>(null);
-
-  const newLocalId = () =>
-    `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
   // ---------- MAPEOS ----------
   const toAnswerNodes = (answers: ExportedAnswer[] = []): AnswerNode[] =>

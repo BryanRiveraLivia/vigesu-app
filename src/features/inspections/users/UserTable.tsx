@@ -102,7 +102,6 @@ const UserTable: FC<Props> = ({ objFilter, refreshFlag }) => {
   // ==========================
   useEffect(() => {
     fetchUsers(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objFilter, refreshFlag, localRefreshFlag, currentPage, rowsPerPage]);
 
   useEffect(() => {

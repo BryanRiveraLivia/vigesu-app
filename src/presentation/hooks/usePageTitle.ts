@@ -1,5 +1,4 @@
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { getLastPathSegmentFormatted } from "@/infrastructure/lib/utils";
 
 /**
@@ -7,14 +6,5 @@ import { getLastPathSegmentFormatted } from "@/infrastructure/lib/utils";
  */
 export const usePageTitle = (): string => {
   const pathname = usePathname();
-  const [pageTitle, setPageTitle] = useState<string>("");
-
-  useEffect(() => {
-    if (pathname) {
-      const title = getLastPathSegmentFormatted(pathname);
-      setPageTitle(title);
-    }
-  }, [pathname]);
-
-  return pageTitle;
+  return getLastPathSegmentFormatted(pathname ?? "");
 };
