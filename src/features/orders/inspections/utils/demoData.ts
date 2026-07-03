@@ -7,7 +7,7 @@ import { LiftgateInspection } from "@/core/types/order/ITypes";
  * Cambia a `false` para depender exclusivamente de las APIs en el funcionamiento normal en producción.
  * Si está en `true`, inyecta 1 inspección simulada por cada uno de los 12 tipos de plantilla.
  */
-export const CARGAR_DEMO: boolean = false
+export const CARGAR_DEMO: boolean = true
 
 export const DEMO_TEMPLATES: Record<number, string> = {
   1: "McKinney Federal Inspection",
