@@ -27,7 +27,6 @@ export default function DashboardLayout({
 
   const { isLoading, loadingLabel } = useLoadingStore();
   const router = useRouter();
-  const token = useAuthStore((state) => state.token);
 
   const isSidebarOpen = useSidebarStore((s) => s.isSidebarOpen);
   const toggleSidebar = useSidebarStore((s) => s.toggleSidebar);

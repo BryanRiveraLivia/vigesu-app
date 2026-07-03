@@ -20,11 +20,14 @@ export const generatePDF = async (
     // ✅ Clonamos el nodo para capturar TODO el contenido sin recorte
     const clone = element.cloneNode(true) as HTMLElement;
 
-    // ✅ Forzamos un ancho de 800px para que el escalado a A4 sea natural
-    // (A4 es ~794px a 96dpi, 800px es el estándar ideal para formularios)
-    clone.style.width = "800px";
-    clone.style.minWidth = "800px";
-    clone.style.maxWidth = "800px";
+    // ✅ Remover clases que restrinjan max-width o añadan márgenes excesivos en el PDF (.container, my-5, etc.)
+    clone.classList.remove("container", "min-h-screen", "my-5", "my-4", "my-6", "mx-auto");
+
+    // ✅ Usamos 1024px para que todos los breakpoints responsivos de escritorio (md: y lg:) estén activos
+    // y para que la tabla ocupe el 100% del ancho sin márgenes en blanco en los extremos
+    clone.style.width = "1024px";
+    clone.style.minWidth = "1024px";
+    clone.style.maxWidth = "1024px";
     clone.style.height = "auto";
     clone.style.maxHeight = "none";
     clone.style.overflow = "visible";
@@ -38,14 +41,14 @@ export const generatePDF = async (
     // ✅ Pequeña espera para asegurar que las imágenes se rendericen
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // ✅ Capturamos imagen con alta escala para nitidez
+    // ✅ Capturamos imagen con escala 2 (excelente nitidez y menos peso que 3)
     const canvas = await html2canvas(clone, {
-      scale: 3, // Incrementamos escala para mayor nitidez
+      scale: 2, // 2 da nitidez impecable sin saturar memoria ni achicar fuentes por sub-pixel scaling
       useCORS: true,
       allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
-      windowWidth: 800,
+      windowWidth: 1024,
     });
 
     const imgData = canvas.toDataURL("image/jpeg", 0.95); // Usamos JPEG para reducir peso si es muy grande

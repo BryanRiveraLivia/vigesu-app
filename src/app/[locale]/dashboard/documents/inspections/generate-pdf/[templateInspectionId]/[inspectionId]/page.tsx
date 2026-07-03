@@ -44,9 +44,22 @@ const GeneratePdfPage = () => {
     documentTitle: `Inspection - ${templateData?.name ?? "Inspection"}`,
 
     pageStyle: `
-    @page { size: auto; margin: 12mm; }
+    @page { size: auto; margin: 10mm; }
     @media print {
-      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        width: 1024px !important;
+        min-width: 1024px !important;
+      }
+      #pdf-content {
+        width: 1024px !important;
+        min-width: 1024px !important;
+        max-width: 1024px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
     }
   `,
   });
