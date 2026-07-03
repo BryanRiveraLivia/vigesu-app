@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { COMPANY_INFO } from "@/config/constants";
+import { COMPANY_INFO, QB_REALM_ID } from "@/core/config/constants";
 import React, { FC, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
@@ -9,28 +9,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import {
   mapOrderEditFormToApiPayload,
   mapOrderFormToApiPayload,
-} from "@/shared/utils/orderMapper";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+} from "@/core/utils/orderMapper";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { debounce } from "lodash";
 import clsx from "clsx";
 import { MdEdit } from "react-icons/md";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { toast } from "sonner";
-import { renameFileWithUniqueName } from "@/shared/utils/utils";
+import { renameFileWithUniqueName } from "@/core/utils/utils";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { formatApiErrorForToast } from "@/core/utils/errors";
 
-interface WorkOrderDetail {
-  observation?: string;
-  quantity?: number | string;
-  itemId?: number;
-}
+import {
+  WorkOrderDetail,
+  CustomerOption,
+  MechanicOption,
+  ItemOption,
+} from "../types/work-order.api";
 
 const workItemSchema = z.object({
   description: z.string().optional(),
@@ -67,21 +68,6 @@ const orderSchema = z.object({
   observation: z.string().optional(),
   work_items: z.array(workItemSchema),
 });
-
-interface CustomerOption {
-  id: number;
-  name: string;
-}
-
-interface MechanicOption {
-  id: number;
-  name: string;
-}
-
-interface ItemOption {
-  id: number;
-  name: string;
-}
 
 export type OrderForm = z.infer<typeof orderSchema>;
 
@@ -136,7 +122,7 @@ const EditOrder = () => {
 
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -160,11 +146,11 @@ const EditOrder = () => {
       } else {
         setCustomerOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleCustomerInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowDropdown(true);
@@ -180,7 +166,7 @@ const EditOrder = () => {
 
   const searchMechanic = async (name?: string) => {
     try {
-      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -204,11 +190,11 @@ const EditOrder = () => {
       } else {
         setMechanicOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleMechanicInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowMechanicDropdown(true);
@@ -224,7 +210,7 @@ const EditOrder = () => {
 
   const searchItem = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -248,7 +234,7 @@ const EditOrder = () => {
       } else {
         setItemOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleItemInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,7 +269,7 @@ const EditOrder = () => {
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
     const res = await axiosInstance.get(
-      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=${QB_REALM_ID}`,
     );
     return res.data?.name ?? "";
   };
@@ -291,7 +277,7 @@ const EditOrder = () => {
   const getMechanicName = async (mechanicId: string) => {
     if (!mechanicId) return "";
     const res = await axiosInstance.get(
-      `/QuickBooks/Employees/GetEmployeeId?EmployeeId=${mechanicId}&RealmId=9341454759827689`
+      `/QuickBooks/Employees/GetEmployeeId?EmployeeId=${mechanicId}&RealmId=${QB_REALM_ID}`,
     );
     return res.data?.name ?? "";
   };
@@ -299,7 +285,7 @@ const EditOrder = () => {
   const fetchWorkOrder = async () => {
     try {
       const res = await axiosInstance.get(
-        `/WorkOrder/GetWorkOrderById?WorkOrderId=${id}`
+        `/WorkOrder/GetWorkOrderById?WorkOrderId=${id}`,
       );
       const data = res.data;
 
@@ -308,7 +294,7 @@ const EditOrder = () => {
       const fetchItemName = async (itemId: number): Promise<string> => {
         if (!itemId) return "";
         const response = await axiosInstance.get(
-          `/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=9341454759827689`
+          `/QuickBooks/Items/GetItemId?ItemId=${itemId}&RealmId=${QB_REALM_ID}`,
         );
         return response.data?.name ?? "";
       };
@@ -320,8 +306,8 @@ const EditOrder = () => {
             quantity: String(item.quantity ?? ""),
             itemId: Number(item.itemId ?? 0), // ✅ aseguramos tipo number
             parts: await fetchItemName(item.itemId ?? 0),
-          })
-        ) ?? []
+          }),
+        ) ?? [],
       );
 
       const customerName = await getCustomerName(data.customerId);
@@ -364,7 +350,7 @@ const EditOrder = () => {
       setSelectedMechanic({ id: data.employeeId, name: mechanicName });
 
       setExistingPhotos(
-        data.workOrderPhotos?.map((p: { name: string }) => p.name) ?? []
+        data.workOrderPhotos?.map((p: { name: string }) => p.name) ?? [],
       );
       setFiles([]);
       previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
@@ -444,7 +430,7 @@ const EditOrder = () => {
               headers: {
                 "Content-Type": "multipart/form-data",
               },
-            }
+            },
           );
           console.log("Upload result:", res.data);
 
@@ -469,7 +455,7 @@ const EditOrder = () => {
           adaptedData,
           selectedCustomer,
           selectedMechanic,
-          id
+          id,
         ),
         updateWorkOrderPhotos: [
           ...files.map((file) => ({ name: file.name })),
@@ -522,7 +508,7 @@ const EditOrder = () => {
   };
 
   const handleNewItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setNewItem((prev) => ({
@@ -600,7 +586,7 @@ const EditOrder = () => {
                       <Loading
                         height="h-[39px]"
                         enableLabel={false}
-                        size="loading-sm "
+                        size="loading-sm"
                       />
                     </div>
                   )}
@@ -750,7 +736,7 @@ const EditOrder = () => {
                   />
                   {isLoadingMechanic && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -823,14 +809,14 @@ const EditOrder = () => {
                     onChange={handleItemInputChange}
                     ref={itemInputRef}
                     className={inputClass(
-                      !!newItemError && newItem.parts.trim() === ""
+                      !!newItemError && newItem.parts.trim() === "",
                     )}
                     type="text"
                     autoComplete="off"
                   />
                   {isLoadingServiceParts && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -875,7 +861,7 @@ const EditOrder = () => {
               value={newItem.quantity}
               onChange={handleNewItemChange}
               className={inputClass(
-                !!newItemError && newItem.quantity.trim() === ""
+                !!newItemError && newItem.quantity.trim() === "",
               )}
               type="number"
             />
@@ -892,7 +878,7 @@ const EditOrder = () => {
               value={newItem.description}
               onChange={handleNewItemChange}
               className={`!text-left p-2 ${inputClass(
-                !!newItemError && newItem.description.trim() === ""
+                !!newItemError && newItem.description.trim() === "",
               )}`}
               rows={3}
               placeholder="Write work description..."
@@ -932,7 +918,7 @@ const EditOrder = () => {
                       {...register(`work_items.${index}.description`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -942,7 +928,7 @@ const EditOrder = () => {
                       type="text"
                       readOnly
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -951,7 +937,7 @@ const EditOrder = () => {
                       {...register(`work_items.${index}.quantity`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -1026,7 +1012,7 @@ const EditOrder = () => {
             // limpiar previews anteriores
             previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
             previewUrlsRef.current = newFiles.map((file) =>
-              URL.createObjectURL(file)
+              URL.createObjectURL(file),
             );
             setFiles(newFiles);
           }}

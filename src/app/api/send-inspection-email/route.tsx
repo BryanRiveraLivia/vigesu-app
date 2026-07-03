@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 export async function POST(req: Request) {
+  const { email, name } = await req.json();
+  const emailComponent = <EmailTemplate recipientName={name || "Usuario"} />;
+
   try {
     const apiKey = process.env.RESEND_API_KEY;
 
@@ -14,16 +17,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 👇 creas la instancia DENTRO del handler
     const resend = new Resend(apiKey);
-
-    const { email, name } = await req.json();
 
     const { data, error } = await resend.emails.send({
       from: "Inspections <onboarding@resend.dev>",
       to: [email],
       subject: "Confirmación de Inspección",
-      react: <EmailTemplate recipientName={name || "Usuario"} />,
+      react: emailComponent,
     });
 
     if (error) {

@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { COMPANY_INFO } from "@/config/constants";
+import { COMPANY_INFO, QB_REALM_ID } from "@/core/config/constants";
 import React, { useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { z } from "zod";
@@ -9,17 +9,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "./ImageUploader";
 import { TbArrowDownToArc } from "react-icons/tb";
 import { IoAddCircleOutline } from "react-icons/io5";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { mapOrderFormToApiPayload } from "@/shared/utils/orderMapper";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
+import { mapOrderFormToApiPayload } from "@/core/utils/orderMapper";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { debounce } from "lodash";
 import clsx from "clsx";
 import { MdEdit } from "react-icons/md";
 import { toast } from "sonner";
-import { renameFileWithUniqueName } from "@/shared/utils/utils";
-import Loading from "@/shared/components/shared/Loading";
+import { renameFileWithUniqueName } from "@/core/utils/utils";
+import Loading from "@/presentation/components/shared/Loading";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { formatApiErrorForToast } from "@/core/utils/errors";
 
 const workItemSchema = z.object({
   description: z.string().optional(),
@@ -57,20 +57,11 @@ const orderSchema = z.object({
   work_items: z.array(workItemSchema),
 });
 
-interface CustomerOption {
-  id: number;
-  name: string;
-}
-
-interface MechanicOption {
-  id: number;
-  name: string;
-}
-
-interface ItemOption {
-  id: number;
-  name: string;
-}
+import {
+  CustomerOption,
+  MechanicOption,
+  ItemOption,
+} from "../types/work-order.api";
 
 export type OrderForm = z.infer<typeof orderSchema>;
 
@@ -115,7 +106,7 @@ const CreateOrder = () => {
 
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -138,11 +129,11 @@ const CreateOrder = () => {
       } else {
         setCustomerOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleCustomerInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowDropdown(true);
@@ -158,7 +149,7 @@ const CreateOrder = () => {
 
   const searchMechanic = async (name?: string) => {
     try {
-      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/employees/GetEmployeeName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -182,11 +173,11 @@ const CreateOrder = () => {
       } else {
         setMechanicOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleMechanicInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = e.target.value;
     setShowMechanicDropdown(true);
@@ -202,7 +193,7 @@ const CreateOrder = () => {
 
   const searchItem = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Items/GetItemName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Items/GetItemName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
 
       const response = await axiosInstance.get(url);
@@ -227,7 +218,7 @@ const CreateOrder = () => {
       } else {
         setItemOptions([]);
       }
-    }, 500)
+    }, 500),
   ).current;
 
   const handleItemInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,7 +290,7 @@ const CreateOrder = () => {
         data,
         selectedCustomer,
         selectedMechanic,
-        files
+        files,
       );
 
       // Enviamos el primer POST para crear el WorkOrder
@@ -357,7 +348,7 @@ const CreateOrder = () => {
   };
 
   const handleNewItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setNewItem((prev) => ({ ...prev, [name]: value }));
@@ -419,7 +410,7 @@ const CreateOrder = () => {
                       <Loading
                         height="h-[39px]"
                         enableLabel={false}
-                        size="loading-sm "
+                        size="loading-sm"
                       />
                     </div>
                   )}
@@ -572,7 +563,7 @@ const CreateOrder = () => {
                   />
                   {isLoadingMechanic && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -644,14 +635,14 @@ const CreateOrder = () => {
                     onChange={handleItemInputChange}
                     ref={itemInputRef}
                     className={inputClass(
-                      !!newItemError && newItem.parts.trim() === ""
+                      !!newItemError && newItem.parts.trim() === "",
                     )}
                     type="text"
                     autoComplete="off"
                   />
                   {isLoadingServiceParts && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                      <Loading enableLabel={false} size="loading-sm " />
+                      <Loading enableLabel={false} size="loading-sm" />
                     </div>
                   )}
                 </div>
@@ -696,7 +687,7 @@ const CreateOrder = () => {
               value={newItem.quantity}
               onChange={handleNewItemChange}
               className={inputClass(
-                !!newItemError && newItem.quantity.trim() === ""
+                !!newItemError && newItem.quantity.trim() === "",
               )}
               type="number"
             />
@@ -712,7 +703,7 @@ const CreateOrder = () => {
               value={newItem.description}
               onChange={handleNewItemChange}
               className={`!text-left p-2 ${inputClass(
-                !!newItemError && newItem.description.trim() === ""
+                !!newItemError && newItem.description.trim() === "",
               )}`}
               rows={3}
               placeholder={tWorkOrders("new.21")}
@@ -752,7 +743,7 @@ const CreateOrder = () => {
                       {...register(`work_items.${index}.description`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -762,7 +753,7 @@ const CreateOrder = () => {
                       type="text"
                       readOnly
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -771,7 +762,7 @@ const CreateOrder = () => {
                       {...register(`work_items.${index}.quantity`)}
                       type="text"
                       className={`${inputClass(
-                        false
+                        false,
                       )} bg-white border-none focus:outline-none focus:ring-0 focus:border-none`}
                     />
                   </td>
@@ -835,7 +826,7 @@ const CreateOrder = () => {
             {...register("observation")}
             className="!text-left p-2 flex-1 input input-lg bg-[#f6f3f4] w-full    transition-all border-1 text-lg font-normal border-gray-100"
             rows={5}
-            placeholder="Write work description..."
+            placeholder={tWorkOrders("new.21")}
           ></textarea>
         </div>
       </div>

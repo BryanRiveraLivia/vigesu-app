@@ -1,18 +1,18 @@
 //  Nuevo formulario con Zod y react-hook-form para validación cruzada
 "use client";
 
-import { COMPANY_INFO } from "@/config/constants";
+import { COMPANY_INFO, QB_REALM_ID } from "@/core/config/constants";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { z } from "zod";
 import { useForm, UseFormRegister, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormChassi from "../types-pdf/FormChassi/FormChassi";
 import { debounce } from "lodash";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { CustomerOption } from "@/shared/utils/orderMapper";
-import { ExportedQuestion } from "@/shared/types/inspection/ITypes";
-import Loading from "@/shared/components/shared/Loading";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { CustomerOption } from "@/core/utils/orderMapper";
+import { ExportedQuestion } from "@/core/types/inspection/ITypes";
+import Loading from "@/presentation/components/shared/Loading";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { toast } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -20,7 +20,7 @@ import {
   InspectionStatusLabel,
 } from "../models/typeInspection";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { formatApiErrorForToast } from "@/core/utils/errors";
 
 interface CreateOrderProps {
   changeTitle?: (newTitle: string) => void;
@@ -93,7 +93,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
   // Handle Customer Input
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
@@ -252,7 +252,7 @@ const CreateOrder = ({ changeTitle }: CreateOrderProps) => {
                       <Loading
                         height="h-[39px]"
                         enableLabel={false}
-                        size="loading-sm "
+                        size="loading-sm"
                       />
                     </div>
                   )}

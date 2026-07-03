@@ -1,20 +1,19 @@
 // components/GroupModal.tsx
 "use client";
+import { useTranslations } from "next-intl";
 
 import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineSave } from "react-icons/ai";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { StatusEnum } from "@/features/inspections/models/GroupTypes";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
-import { toast } from "sonner";
+import { GroupStatusEnum } from "@/core/domain/entities/group.entity";
+import { useGroupMutations } from "@/presentation/hooks/groups/useGroupMutations";
 
 interface GroupModalProps {
   onClose: () => void;
   onSuccess: () => void;
   editMode?: boolean;
   defaultValue?: string;
-  defaultStatus?: StatusEnum;
+  defaultStatus?: GroupStatusEnum;
   groupIdToEdit?: number;
 }
 
@@ -23,37 +22,33 @@ const GroupModal: React.FC<GroupModalProps> = ({
   onSuccess,
   editMode = false,
   defaultValue = "",
-  defaultStatus = StatusEnum.Active,
+  defaultStatus = GroupStatusEnum.Active,
   groupIdToEdit,
 }) => {
+  const tPlaceholders = useTranslations("placeholders");
+  const tGroups = useTranslations("groups");
+  const tGeneral = useTranslations("general");
+
   const [name, setName] = useState(defaultValue);
-  const [status, setStatus] = useState<StatusEnum>(defaultStatus);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<GroupStatusEnum>(defaultStatus);
+
+  const { createGroup, updateGroup, loading } = useGroupMutations();
 
   const handleSubmit = async () => {
+    // Note: Alerts are still hardcoded here as they might need a different handling strategy (e.g. toast) or separate task
     if (!name.trim()) return alert("El nombre es obligatorio");
-    setLoading(true);
+
     try {
       if (editMode && groupIdToEdit !== undefined) {
-        await axiosInstance.put(`/Group/${groupIdToEdit}`, {
-          groupId: groupIdToEdit,
-          name,
-          status,
-        });
+        await updateGroup(groupIdToEdit, name, status);
       } else {
-        await axiosInstance.post("/Group", { name });
+        await createGroup(name);
       }
       onSuccess();
       onClose();
     } catch (error) {
-      /*console.error("Error al guardar grupo", error);
-      alert("Hubo un error al guardar el grupo");*/
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
-    } finally {
-      setLoading(false);
+      console.error("Error al guardar grupo", error);
+      alert("Hubo un error al guardar el grupo");
     }
   };
 
@@ -62,12 +57,12 @@ const GroupModal: React.FC<GroupModalProps> = ({
       <div className="modal-box w-11/12 max-w-2xl">
         <div className="mb-3">
           <label className="font-semibold mb-1 block text-lg">
-            {editMode ? "Edit Group" : "New Group"}
+            {editMode ? tGroups("edit_title") : tGroups("new_title")}
           </label>
           <input
             type="text"
             className="input input-lg bg-[#f6f3f4] w-full text-lg"
-            placeholder="Group name"
+            placeholder={tPlaceholders("group_name")}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -75,14 +70,22 @@ const GroupModal: React.FC<GroupModalProps> = ({
 
         {editMode && (
           <div className="mb-3">
-            <label className="font-semibold mb-1 block text-lg">Status</label>
+            <label className="font-semibold mb-1 block text-lg">
+              {tGroups("status")}
+            </label>
             <select
               className="select w-full input-lg"
               value={status}
-              onChange={(e) => setStatus(Number(e.target.value))}
+              onChange={(e) =>
+                setStatus(Number(e.target.value) as GroupStatusEnum)
+              }
             >
-              <option value={StatusEnum.Active}>Activo</option>
-              <option value={StatusEnum.Inactive}>Inactivo</option>
+              <option value={GroupStatusEnum.Active}>
+                {tGroups("active")}
+              </option>
+              <option value={GroupStatusEnum.Inactive}>
+                {tGroups("inactive")}
+              </option>
             </select>
           </div>
         )}
@@ -94,7 +97,8 @@ const GroupModal: React.FC<GroupModalProps> = ({
             onClick={onClose}
             disabled={loading}
           >
-            <IoMdClose className="w-[20px] h-[20px] opacity-70" /> Cancelar
+            <IoMdClose className="w-[20px] h-[20px] opacity-70" />{" "}
+            {tGeneral("btnCancel")}
           </button>
           <button
             type="button"
@@ -103,7 +107,7 @@ const GroupModal: React.FC<GroupModalProps> = ({
             disabled={!name.trim() || loading}
           >
             <AiOutlineSave className="w-[20px] h-[20px] opacity-70" />
-            Guardar
+            {tGeneral("btnSave")}
           </button>
         </div>
       </div>

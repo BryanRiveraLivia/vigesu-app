@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { generateFakeTableData } from "@/shared/data/fakeTableData";
+import { generateFakeTableData } from "@/core/constants/fakeTableData";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegFilePdf } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/inspection/ITypes";
+import { TableListProps } from "@/core/types/inspection/ITypes";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 
-const TableList = ({ objFilter }: TableListProps) => {
+const TableList = ({ objFilter, setRefreshFlag }: TableListProps) => {
   const [allData, setAllData] = useState(() => generateFakeTableData(100));
 
-  const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const filteredData = allData.filter((item) => {
@@ -26,16 +25,22 @@ const TableList = ({ objFilter }: TableListProps) => {
   });
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIdx = (currentPage - 1) * rowsPerPage;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filterKey, setFilterKey] = useState("");
+  const nextFilterKey = JSON.stringify({ objFilter, rowsPerPage });
+  if (nextFilterKey !== filterKey) {
+    setFilterKey(nextFilterKey);
+    setCurrentPage(1);
+  }
+
+  const safePage = Math.min(currentPage, totalPages) || 1;
+  const startIdx = (safePage - 1) * rowsPerPage;
   const currentRows = filteredData.slice(startIdx, startIdx + rowsPerPage);
 
   const changePage = (page: number) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [objFilter, rowsPerPage]);
 
   return (
     <div className="overflow-x-auto space-y-4">
@@ -94,7 +99,6 @@ const TableList = ({ objFilter }: TableListProps) => {
       </table>
 
       {/* Paginación */}
-      {/* Paginación con inicio y fin */}
       <div className="join flex justify-center py-4">
         <button
           className="join-item btn font-normal"

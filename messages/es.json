@@ -222,7 +222,21 @@
     "btnPrint": "Imprimir",
     "btnDelete": "Eliminar",
     "btnSearch": "Buscar",
-    "btnNew": "Nuevo"
+    "btnNew": "Nuevo",
+    "btnCancel": "Cancelar",
+    "btnSend": "Enviar",
+    "btnSave": "Guardar",
+    "btnPreview": "Vista previa",
+    "sending": "Enviando...",
+    "no_records": "No se encontraron registros",
+    "name": "Nombre",
+    "description": "Descripción",
+    "status": "Estado",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "email_modal": {
+    "title": "Ingresa tu correo"
   },
   "dashboard": {
     "header": {
@@ -267,7 +281,12 @@
     "search_options": "Opciones de búsqueda",
     "customer": "Cliente",
     "status": "Estado",
-    "pick_status": "Seleccionar estado"
+    "pick_status": "Seleccionar estado",
+    "edit_title": "Editar Grupo",
+    "new_title": "Nuevo Grupo",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "group": "Grupo"
   },
   "inspection_configuration": {
     "title": "Configuración de inspección",
@@ -281,5 +300,16 @@
   "orders_theme": {
     "search_options": "Opciones de búsqueda",
     "form": "Formulario"
+  },
+  "placeholders": {
+    "write_answer": "Escribe tu respuesta...",
+    "email_example": "ejemplo@email.com",
+    "write_work_description": "Escribir descripción del trabajo...",
+    "answer": "Respuesta",
+    "group_name": "Nombre del grupo"
+  },
+  "inspection_status": {
+    "0": "Activo",
+    "1": "Inactivo"
   }
 }

@@ -1,14 +1,8 @@
 // components/AnswerOptions.tsx
 import React from "react";
-import { IFullAnswer } from "../../types/IFullTypeInspection";
+import { AnswerOptionsProps } from "./AnswerOptions.types";
 
-interface Props {
-  answers: IFullAnswer[];
-  renderAnswer: (answer: IFullAnswer, level?: number) => React.ReactNode;
-}
-
-const AnswerOptions = ({ answers, renderAnswer }: Props) => {
-  console.log("datita: ", answers, renderAnswer);
+const AnswerOptions = ({ answers, renderAnswer }: AnswerOptionsProps) => {
   return (
     <div className="mt-4 flex flex-row gap-4 flex-nowrap overflow-x-auto">
       {answers.map((answer) => (

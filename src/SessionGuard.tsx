@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
+import { performLogout } from "@/core/utils/logout";
 
 const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en ms
 
@@ -10,8 +10,6 @@ export default function SessionGuard({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const { token, logout } = useAuthStore();
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -20,8 +18,7 @@ export default function SessionGuard({
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        logout(); // limpia Zustand
-        setShowModal(true); // muestra el modal
+        setShowModal(true);
       }, INACTIVITY_LIMIT);
     };
 
@@ -36,7 +33,7 @@ export default function SessionGuard({
     activityEvents.forEach((event) =>
       window.addEventListener(event, resetTimer)
     );
-    resetTimer(); // inicializa el timer
+    resetTimer();
 
     return () => {
       clearTimeout(inactivityTimer);
@@ -44,12 +41,11 @@ export default function SessionGuard({
         window.removeEventListener(event, resetTimer)
       );
     };
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
-    // detecta borrado del store
     const unsub = useAuthStore.subscribe((state) => {
-      if (!state.token || !state.user) {
+      if (!state.user) {
         setShowModal(true);
       }
     });
@@ -59,7 +55,7 @@ export default function SessionGuard({
 
   const handleLoginRedirect = () => {
     setShowModal(false);
-    router.push("/");
+    performLogout();
   };
 
   return (

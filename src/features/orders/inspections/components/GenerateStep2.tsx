@@ -7,14 +7,14 @@ import {
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
 import Lottie from "lottie-react";
-import checkLottie from "@/assets/lotties/check.json";
+import checkLottie from "@/presentation/assets/lotties/check.json";
 import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { formatApiErrorForToast } from "@/core/utils/errors";
 
 const GenerateStep2 = () => {
   const t = useTranslations("inspections");

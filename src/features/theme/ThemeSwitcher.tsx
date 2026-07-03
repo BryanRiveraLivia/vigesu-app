@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { THEMES } from "./theme.constants";
 
 export const ThemeSwitcher = () => {
-  const [theme, setTheme] = useState<string>(THEMES.LIGHT);
+  const [theme, setTheme] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") || THEMES.LIGHT;
+    }
+    return THEMES.LIGHT;
+  });
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    const initialTheme = storedTheme || THEMES.LIGHT;
-    setTheme(initialTheme);
-    document.documentElement.setAttribute("data-theme", initialTheme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, []);
 
   const toggleTheme = () => {

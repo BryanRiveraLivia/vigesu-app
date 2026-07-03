@@ -4,13 +4,13 @@ import InspectionModal from "./InspectionModal";
 import { AnswerNode } from "./AnswerItem";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { GrDuplicate } from "react-icons/gr";
 import { MdEdit } from "react-icons/md";
 import {
   ExportedAnswer,
   ExportedQuestion,
-} from "@/shared/types/inspection/ITypes";
+} from "@/core/types/inspection/ITypes";
 import {
   TypeQuestion,
   TypeQuestionLabel,
@@ -40,8 +40,11 @@ const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
   return out;
 };
 
-const newLocalId = (): string =>
-  `n_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+let localIdCounter = 0;
+const newLocalId = (): string => {
+  localIdCounter += 1;
+  return `n_${localIdCounter}`;
+};
 
 type LocalQuestion = ExportedQuestion & { _localId: string };
 
@@ -341,19 +344,25 @@ const FormChassi: React.FC<FormChassiProps> = ({
     return TypeQuestionLabel[type as TypeQuestion] ?? String(type);
   };
 
-  useEffect(() => {
-    const copy = JSON.parse(
-      JSON.stringify(initialQuestions || [])
-    ) as ExportedQuestion[];
-    const seeded: LocalQuestion[] = copy.map((q) => ({
-      ...q,
-      _localId: newLocalId(),
-      typeInspectionDetailAnswers: dedupeAnswers(
-        q.typeInspectionDetailAnswers ?? []
-      ),
-    }));
-    setQuestions(seeded);
-  }, [initialQuestions]);
+  const [prevInitialQuestions, setPrevInitialQuestions] =
+    useState(initialQuestions);
+
+  if (initialQuestions !== prevInitialQuestions) {
+    setPrevInitialQuestions(initialQuestions);
+    if (initialQuestions?.length) {
+      const copy = JSON.parse(
+        JSON.stringify(initialQuestions)
+      ) as ExportedQuestion[];
+      const seeded: LocalQuestion[] = copy.map((q) => ({
+        ...q,
+        _localId: newLocalId(),
+        typeInspectionDetailAnswers: dedupeAnswers(
+          q.typeInspectionDetailAnswers ?? []
+        ),
+      }));
+      setQuestions(seeded);
+    }
+  }
 
   const visibleRows = questions
     .filter((q) => q.status !== STATUS_DELETED)

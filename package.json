@@ -10,11 +10,13 @@
     "build:staging": "netlify deploy",
     "build:prod": "netlify deploy --prod",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx",
     "find:dead": "ts-prune",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "lint:check": "eslint . --ext .ts,.tsx",
-    "dead:check": "ts-prune"
+    "dead:check": "ts-prune",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@faker-js/faker": "^9.8.0",
@@ -35,7 +37,7 @@
     "jspdf": "^3.0.1",
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
-    "next": "^16.0.10",
+    "next": "^16.2.9",
     "next-intl": "^4.5.8",
     "pikaday": "^1.8.2",
     "puppeteer": "^24.33.0",

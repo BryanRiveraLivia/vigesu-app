@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { API_CONFIG } from "@/shared/config/apiConfig";
+import { API_CONFIG } from "@/core/config/apiConfig";
 
 export async function POST(req: NextRequest) {
   try {

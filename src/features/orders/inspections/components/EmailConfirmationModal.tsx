@@ -17,6 +17,10 @@ const EmailConfirmationModal: React.FC<Props> = ({
   userName,
 }) => {
   const tToasts = useTranslations("toast");
+  const tPlaceholders = useTranslations("placeholders");
+  const tGeneral = useTranslations("general");
+  const tModal = useTranslations("email_modal");
+
   const [email, setEmail] = useState("bryan.riv09@gmail.com");
   const [loading, setLoading] = useState(false);
 
@@ -54,11 +58,11 @@ const EmailConfirmationModal: React.FC<Props> = ({
   return (
     <div className="fixed z-50 inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl space-y-4">
-        <h2 className="text-lg font-semibold">Enter your email</h2>
+        <h2 className="text-lg font-semibold">{tModal("title")}</h2>
         <input
           type="email"
           className="input input-bordered w-full"
-          placeholder="example@email.com"
+          placeholder={tPlaceholders("email_example")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -68,14 +72,14 @@ const EmailConfirmationModal: React.FC<Props> = ({
             onClick={onClose}
             disabled={loading}
           >
-            Cancel
+            {tGeneral("btnCancel")}
           </button>
           <button
             className="btn bg-black text-white"
             onClick={handleSend}
             disabled={loading}
           >
-            {loading ? "Sending..." : "Send"}
+            {loading ? tGeneral("sending") : tGeneral("btnSend")}
           </button>
         </div>
       </div>

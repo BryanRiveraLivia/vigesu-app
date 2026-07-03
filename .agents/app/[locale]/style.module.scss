@@ -1,0 +1,10 @@
+.informeson::after {
+  position: absolute;
+  right: -1px;
+  top: 0;
+  width: 276px;
+  height: 100%;
+  content: "";
+  z-index: -1;
+  background: url("/assets/img/img-51.png") top left repeat;
+}

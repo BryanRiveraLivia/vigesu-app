@@ -1,93 +1,62 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { IGroup } from "../models/GroupTypes";
-import { TableListProps } from "@/shared/types/inspection/ITypes";
-import { getInspectionStatusGroupsLabel } from "@/shared/utils/utils";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+// ... imports
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+// Domain Entities
+import {
+  Group,
+  GroupStatusEnum,
+  GroupStatusLabel,
+} from "@/core/domain/entities/group.entity";
+// Presentation Hook
+import { useGroups } from "@/presentation/hooks/groups/useGroups";
+// Shared UI
+import { TableListProps } from "@/core/types/inspection/ITypes";
+// import { getInspectionStatusGroupsLabel } from "@/core/utils/utils"; // Removed in favor of entity label or mapping
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { FaRegEdit } from "react-icons/fa";
 import GroupModal from "./create/GroupModal";
-import Loading from "@/shared/components/shared/Loading";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
-import { toast } from "sonner";
-
-// Estructura que devuelve tu API de Group
-interface GetGroupsResponse {
-  items: IGroup[];
-  pageNumber: number;
-  totalPages: number;
-  totalCount: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-}
+import Loading from "@/presentation/components/shared/Loading";
 
 const TableList = ({
   objFilter,
   refreshFlag,
   setRefreshFlag,
 }: TableListProps) => {
-  const [allData, setAllData] = useState<IGroup[]>([]);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const tGeneral = useTranslations("general");
+  const tGroups = useTranslations("groups");
+  const tStatus = useTranslations("inspection_status");
 
+  // Local state for pagination managed here, but data fetching delegated to hook
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Could be dynamic if needed
 
-  const [loading, setLoading] = useState(false);
+  const [filterKey, setFilterKey] = useState("");
+  const nextFilterKey = JSON.stringify({ objFilter, rowsPerPage });
+  if (nextFilterKey !== filterKey) {
+    setFilterKey(nextFilterKey);
+    setCurrentPage(1);
+  }
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<IGroup | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
-  const totalPages = Math.max(1, Math.ceil(totalRecords / rowsPerPage));
+  // Hook Usage
+  const { groups, loading, totalPages, refresh } = useGroups({
+    page: currentPage,
+    pageSize: rowsPerPage,
+    name: objFilter.client,
+    status: objFilter.status,
+  });
+
+  // Effect to trigger refresh when parent asks (refreshFlag changes)
+  useEffect(() => {
+    refresh();
+  }, [refreshFlag]);
 
   const handleSuccess = () => {
     setSelectedGroup(null);
     setShowModal(false);
-    // forzamos refetch desde el padre
-    setRefreshFlag((prev) => !prev);
-  };
-
-  // ==========================
-  // 🔹 FETCH DATA (PAGINATION)
-  // ==========================
-  const fetchGroups = async (page = 1) => {
-    setLoading(true);
-
-    try {
-      const params: Record<string, unknown> = {
-        PageNumber: page,
-        PageSize: rowsPerPage,
-      };
-
-      // Filtros enviados al backend
-      if (objFilter.client) {
-        // tu input "customer" realmente filtra por nombre
-        params.Name = objFilter.client;
-      }
-
-      if (objFilter.status !== "") {
-        params.Status = Number(objFilter.status);
-      }
-
-      const response = await axiosInstance.get<GetGroupsResponse>("/Group", {
-        params,
-      });
-
-      const data = response.data;
-
-      setAllData(data.items ?? []);
-      setTotalRecords(data.totalCount ?? data.items?.length ?? 0);
-    } catch (error) {
-      //console.error("Error al cargar grupos", error);
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
-      setAllData([]);
-      setTotalRecords(0);
-    } finally {
-      setLoading(false);
-    }
+    setRefreshFlag((prev) => !prev); // Notify parent or just trigger hook refresh internally
   };
 
   const changePage = (page: number) => {
@@ -96,31 +65,16 @@ const TableList = ({
     }
   };
 
-  // ==========================
-  // 🔹 EFFECTS
-  // ==========================
-  // Refetch cuando cambian filtros, refreshFlag, página o rowsPerPage
-  useEffect(() => {
-    fetchGroups(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [objFilter, refreshFlag, currentPage, rowsPerPage]);
-
-  // Cuando cambian filtros o rowsPerPage, regresamos a la página 1
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [objFilter, rowsPerPage]);
-
-  // ==========================
-  // 🔹 VIEW
-  // ==========================
   return (
     <>
       <div className="overflow-x-auto space-y-4">
         <table className="table table-fixed w-full">
           <thead>
             <tr>
-              <th className="w-[50%] truncate">Group</th>
-              <th className="w-[30%] truncate text-center">Status</th>
+              <th className="w-[50%] truncate">{tGroups("group")}</th>
+              <th className="w-[30%] truncate text-center">
+                {tGeneral("status")}
+              </th>
               <th className="w-[20%] truncate"></th>
             </tr>
           </thead>
@@ -131,14 +85,14 @@ const TableList = ({
                   <Loading height="h-[200px]" />
                 </td>
               </tr>
-            ) : allData.length === 0 ? (
+            ) : groups.length === 0 ? (
               <tr>
                 <td colSpan={3} className="py-6 text-center">
-                  No records found
+                  {tGeneral("no_records")}
                 </td>
               </tr>
             ) : (
-              allData.map((item) => (
+              groups.map((item) => (
                 <tr
                   key={item.groupId}
                   className="cursor-pointer odd:bg-base-200"
@@ -147,14 +101,15 @@ const TableList = ({
                   <td className="text-center">
                     <div
                       className={`badge badge-dash ${
-                        item.status === 0
+                        item.status === GroupStatusEnum.Active
                           ? "badge-success"
-                          : item.status === 1
+                          : item.status === GroupStatusEnum.Inactive
                             ? "badge-warning"
                             : "badge-neutral"
                       }`}
                     >
-                      {getInspectionStatusGroupsLabel(item.status)}
+                      {/* Using domain label mapping directly or utility function if needed */}
+                      {tStatus(`${item.status}` as any)}
                     </div>
                   </td>
 
@@ -163,7 +118,7 @@ const TableList = ({
                       icon={
                         <FaRegEdit className="w-[20px] h-[20px] opacity-70" />
                       }
-                      label="Edit"
+                      label={tGeneral("edit")}
                       onClick={() => {
                         setSelectedGroup(item);
                         setShowModal(true);
@@ -175,6 +130,7 @@ const TableList = ({
             )}
           </tbody>
         </table>
+        {/* ... pagination (kept same structure mostly) ... */}
 
         {/* Paginación */}
         <div className="join flex justify-center py-4">

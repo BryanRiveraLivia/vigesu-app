@@ -1,19 +1,18 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { UserStatusLabel } from "../../models/UsersTypes";
 import SignaturePad, { SignaturePadRef } from "../../users/SignaturePad";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 import { useParams, useRouter } from "next/navigation";
-import Loading from "@/shared/components/shared/Loading";
+import Loading from "@/presentation/components/shared/Loading";
 import { toast } from "sonner";
-import { DOMAIN } from "@/config/constants";
+import { DOMAIN } from "@/core/config/constants";
 import debounce from "lodash/debounce";
 import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/shared/stores/useAuthStore";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import { useAuthStore } from "@/presentation/stores/useAuthStore";
 
 type EmployeeOption = { id: string; name: string };
 
@@ -118,12 +117,8 @@ const EditOrder = () => {
           setSignaturePreview(`${data.signatureImagePath}`);
         }
       } catch (error) {
-        /*console.error("Error al cargar usuario:", error);
-        toast.error(`${tToasts("error")}: ${error}`);*/
-        const msg = formatApiErrorForToast(error);
-        toast.error(msg, {
-          style: { whiteSpace: "pre-line" },
-        });
+        console.error("Error al cargar usuario:", error);
+        toast.error(`${tToasts("error")}: ${error}`);
       } finally {
         setLoading(false);
       }
@@ -167,12 +162,8 @@ const EditOrder = () => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.13")}`);
       router.push("../"); // vuelve al listado de usuarios de este módulo
     } catch (error) {
-      /* console.error("PUT user error", error);
-      toast.error(`${tToasts("error")}: ${error}`);*/
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
+      console.error("PUT user error", error);
+      toast.error(`${tToasts("error")}: ${error}`);
     } finally {
       setSaving(false);
     }
@@ -279,7 +270,7 @@ const EditOrder = () => {
               {/* Loader */}
               {isSearchingEmp && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-                  <Loading enableLabel={false} size="loading-sm " />
+                  <Loading enableLabel={false} size="loading-sm" />
                 </div>
               )}
             </div>

@@ -12,20 +12,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormChassi from "../types-pdf/FormChassiEdit/FormChassi";
 import { debounce } from "lodash";
 import type { DebouncedFunc } from "lodash";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { CustomerOption } from "@/shared/utils/orderMapper";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { QB_REALM_ID } from "@/core/config/constants";
+import { CustomerOption } from "@/core/utils/orderMapper";
 import {
   ExportedAnswer,
   ExportedQuestion,
-} from "@/shared/types/inspection/ITypes";
-import Loading from "@/shared/components/shared/Loading";
-import AlertInfo from "@/shared/components/shared/AlertInfo";
+} from "@/core/types/inspection/ITypes";
+import Loading from "@/presentation/components/shared/Loading";
+import AlertInfo from "@/presentation/components/shared/AlertInfo";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import { InspectionStatusLabel } from "../models/typeInspection";
 import { MdEdit } from "react-icons/md";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
 
 // --------- Estados backend ----------
 const STATUS_ACTIVE = 0 as const;
@@ -93,7 +93,7 @@ const dedupeAnswers = (answers: ExportedAnswer[]): ExportedAnswer[] => {
       out.push({
         ...a,
         subTypeInspectionDetailAnswers: dedupeAnswers(
-          a.subTypeInspectionDetailAnswers ?? [],
+          a.subTypeInspectionDetailAnswers ?? []
         ),
       });
     }
@@ -125,7 +125,7 @@ const mapAnswerFromApi = (a: BackendAnswer): ExportedAnswer => {
     usingItem: !!a.usingItem,
     isPrintable: a.isPrintable ?? true,
     subTypeInspectionDetailAnswers: Array.isArray(
-      a.subTypeInspectionDetailAnswers,
+      a.subTypeInspectionDetailAnswers
     )
       ? a.subTypeInspectionDetailAnswers.map(mapAnswerFromApi)
       : [],
@@ -158,7 +158,7 @@ const toApiAnswers = (answers: ExportedAnswer[] = []): ApiAnswer[] =>
       usingItem: !!ans?.usingItem,
       isPrintable: ans?.isPrintable ?? true,
       subTypeInspectionDetailAnswers: toApiAnswers(
-        ans?.subTypeInspectionDetailAnswers ?? [],
+        ans?.subTypeInspectionDetailAnswers ?? []
       ),
     };
   });
@@ -206,7 +206,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [templates, setTemplates] = useState<{ id: number; name: string }[]>(
-    [],
+    []
   );
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
 
@@ -258,16 +258,12 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   // Handle Customer Input
   const searchCustomer = async (name?: string) => {
     try {
-      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=9341454759827689`;
+      let url = `/QuickBooks/Customers/GetCustomerName?RealmId=${QB_REALM_ID}`;
       if (name) url += `&Name=${encodeURIComponent(name)}`;
       const response = await axiosInstance.get<CustomerOption[]>(url);
       setCustomerOptions(response.data ?? []);
     } catch (error) {
-      //console.error("Error buscando clientes:", error);
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
+      console.error("Error buscando clientes:", error);
     } finally {
       setIsLoadingCustomer(false);
     }
@@ -281,7 +277,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
         } else {
           setCustomerOptions([]);
         }
-      }, 500),
+      }, 500)
     ).current;
 
   const handleCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,7 +300,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
   const getCustomerName = async (customerId: string) => {
     if (!customerId) return "";
     const res = await axiosInstance.get<CustomerIdRes>(
-      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=9341454759827689`,
+      `/QuickBooks/Customers/GetCustomerId?CustomerId=${customerId}&RealmId=${QB_REALM_ID}`
     );
     return res.data?.name ?? "";
   };
@@ -317,9 +313,9 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
     const fetchInitialData = async () => {
       try {
         const [templateRes, inspectionRes] = await Promise.all([
-          axiosInstance.get<TemplateRes>("/TemplateInspection?pageSize=100"),
+          axiosInstance.get<TemplateRes>("/TemplateInspection"),
           axiosInstance.get<TypeInspectionGetResponse>(
-            `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`,
+            `/TypeInspection/GetTypeInspectionId?TypeInspectionId=${id}`
           ),
         ]);
 
@@ -328,7 +324,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           items.map((t) => ({
             id: t.templateInspectionId,
             name: t.name,
-          })),
+          }))
         );
 
         const data = inspectionRes.data;
@@ -367,7 +363,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               ? STATUS_DELETED
               : STATUS_ACTIVE,
           typeInspectionDetailAnswers: dedupeAnswers(
-            (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi),
+            (q.typeInspectionDetailAnswers ?? []).map(mapAnswerFromApi)
           ),
         }));
 
@@ -375,13 +371,13 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
           initialQuestionsRef.current = mappedQuestions;
           latestQuestionsRef.current = mappedQuestions; // seed ref
           setHasAtLeastOneQuestion(
-            mappedQuestions.some((qq) => qq.status !== STATUS_DELETED),
+            mappedQuestions.some((qq) => qq.status !== STATUS_DELETED)
           );
         } else {
           setHasAtLeastOneQuestion(
             (latestQuestionsRef.current ?? []).some(
-              (qq) => qq.status !== STATUS_DELETED,
-            ),
+              (qq) => qq.status !== STATUS_DELETED
+            )
           );
         }
       } catch (err) {
@@ -440,12 +436,8 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
       toast.success(`${tToasts("ok")}: ${tToasts("msj.33")}`);
       router.push("../");
     } catch (error) {
-      /*toast.error(`${tToasts("error")}: ${error}`);
-      console.error(error);*/
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
+      toast.error(`${tToasts("error")}: ${error}`);
+      console.error(error);
     }
   };
 
@@ -541,7 +533,7 @@ const EditOrder = ({ changeTitle }: EditOrderProps) => {
               />
             </div>
             <div className="flex flex-row gap-2 items-center justify-center col-span-1">
-              <span className={labelClass()}>Themex</span>
+              <span className={labelClass()}>Theme</span>
               <select
                 defaultValue=""
                 disabled
@@ -677,7 +669,7 @@ const CustomerSelector: React.FC<CustomerSelectorProps> = ({
         />
         {isLoadingCustomer && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20">
-            <Loading height="h-[39px]" enableLabel={false} size="loading-sm " />
+            <Loading height="h-[39px]" enableLabel={false} size="loading-sm" />
           </div>
         )}
       </div>

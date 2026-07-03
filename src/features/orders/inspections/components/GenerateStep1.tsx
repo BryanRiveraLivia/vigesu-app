@@ -1,76 +1,52 @@
 "use client";
-import React, { FC, useEffect, useRef, useState } from "react";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { IoSearchOutline } from "react-icons/io5";
-import { MdOutlineSettingsBackupRestore } from "react-icons/md";
-import {
-  CustomerOption,
-  TypeInspectionOption,
-} from "@/features/orders/inspections/types/IInspectionSelect";
-import { debounce } from "lodash";
+import React, { FC, useState } from "react";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import {
   IFullAnswer,
   IFullQuestion,
   IFullTypeInspection,
 } from "../types/IFullTypeInspection";
-import Loading from "@/shared/components/shared/Loading";
-import { GiAutoRepair } from "react-icons/gi";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import Loading from "@/presentation/components/shared/Loading";
+import { useRouter } from "next/navigation";
 import { useInspectionFullStore } from "../../store/inspection/inspectionFullStore";
-import { group } from "console";
 import Wizard from "./Wizard";
-import Lottie from "lottie-react";
-
-import checkLottie from "@/assets/lotties/check.json";
 import { FaCheckCircle } from "react-icons/fa";
 import clsx from "clsx";
 import { BsQuestionCircle } from "react-icons/bs";
 import { toast } from "sonner";
 import ImageUploader from "../../create-order/ImageUploader";
-import { useAuthUser } from "@/shared/stores/useAuthUser";
+import { useAuthUser } from "@/presentation/stores/useAuthUser";
 import EmailConfirmationModal from "./EmailConfirmationModal";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
-
-interface GenerateStep1Props {
-  ClientName: string;
-}
+import { GenerateStep1Props } from "./GenerateStep1.types";
 
 const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const t = useTranslations("inspections");
   const [showModal, setShowModal] = useState(false);
   const tToasts = useTranslations("toast");
-  const { userName, employeeName, rol, employeeId } = useAuthUser();
+  const { employeeName, employeeId } = useAuthUser();
   const [inspectionFiles, setInspectionFiles] = useState<File[]>([]);
 
   const router = useRouter();
-  const pathname = usePathname();
-  const {
-    groupedQuestions,
-    fullInspection,
-    setStepWizard,
-    setCompleteStep1,
-    setGroupedQuestions,
-  } = useInspectionFullStore();
+  const { groupedQuestions, fullInspection, setStepWizard, setCompleteStep1 } =
+    useInspectionFullStore();
 
   const goStep = async (
     typeInspectionId: number,
     groupName: string,
-    groupId: number
+    groupId: number,
   ) => {
     try {
       const store = useInspectionFullStore.getState();
       const previous = store.fullInspection;
 
       const res = await axiosInstance.get<IFullTypeInspection>(
-        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`
+        `/TypeInspection/GetFullTypeInspectionId?TypeInspectionId=${typeInspectionId}`,
       );
 
-      // fusiona respuestas anteriores si existen
       const mergedQuestions = res.data.questions.map((q) => {
         const prev = previous?.questions.find(
-          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId
+          (pq) => pq.typeInspectionDetailId === q.typeInspectionDetailId,
         );
         return {
           ...q,
@@ -87,11 +63,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
 
       useInspectionFullStore.getState().setGroupName(groupName);
       useInspectionFullStore.getState().setGroupId(groupId);
-      /* const grouped = res.data.questions.reduce((acc, question) => {
-          if (!acc[question.groupName]) acc[question.groupName] = [];
-          acc[question.groupName].push(question);
-          return acc;
-        }, {} as Record<string, IFullQuestion[]>);*/
       setCompleteStep1(false);
       setStepWizard(2);
     } catch (err) {
@@ -100,7 +71,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   };
 
   const extractAnswerRecursiveArray = (
-    answers: IFullAnswer[]
+    answers: IFullAnswer[],
   ): IFullAnswer[] => {
     return answers.flatMap((answer) => [
       {
@@ -115,8 +86,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
   const handleFinalSubmit = async () => {
     if (!fullInspection) return;
 
-    // Generar lista de nombres de archivos
-    const inspectionPhotoNames = inspectionFiles.map((f) => f.name);
     const payload = {
       typeInspectionId: fullInspection.typeInspectionId,
       customerId: fullInspection.customerId,
@@ -125,7 +94,6 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       employeeName: employeeName?.toString(),
       dateOfInspection: new Date().toISOString(),
       inspectionDetails: fullInspection.questions.map((q) => {
-        // 🔎 Obtenemos todas las respuestas recursivas
         const flatAnswers = extractAnswerRecursiveArray(q.answers ?? []);
 
         return {
@@ -151,17 +119,15 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
       })),
     };
 
-    console.log("📤 Enviando payload a API:", payload);
     try {
       const response = await axiosInstance.post("/Inspection", payload);
-      const inspectionId = response.data; // ✅ número entero simple, como mencionaste
+      const inspectionId = response.data;
 
-      // 2️⃣ Subir archivos si existen
       if (inspectionFiles.length > 0) {
         const formData = new FormData();
-        formData.append("InspectionId", inspectionId.toString()); // ✅ ahora sí se pasa correctamente
+        formData.append("InspectionId", inspectionId.toString());
         inspectionFiles.forEach((file) => {
-          formData.append("Files", file); // ✅ debe coincidir con lo que espera el backend
+          formData.append("Files", file);
         });
 
         await axiosInstance.post(
@@ -171,19 +137,15 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         );
       }
       toast.success(`${tToasts("ok")}: ${tToasts("msj.28")}`);
       useInspectionFullStore.getState().resetFullInspection();
       router.push("./");
     } catch (error) {
-      /*toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
-      console.error(error);*/
-      const msg = formatApiErrorForToast(error);
-      toast.error(msg, {
-        style: { whiteSpace: "pre-line" },
-      });
+      toast.error(`${tToasts("error")}: ${tToasts("msj.29")}`);
+      console.error(error);
     }
   };
 
@@ -203,8 +165,8 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                     acc[question.groupName].push(question);
                     return acc;
                   },
-                  {} as Record<string, IFullQuestion[]>
-                )
+                  {} as Record<string, IFullQuestion[]>,
+                ),
               ).map(([groupName, questions]) => {
                 const groupId = questions[0]?.groupId;
                 return (
@@ -213,14 +175,14 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                       goStep(
                         fullInspection.typeInspectionId,
                         groupName,
-                        groupId
+                        groupId,
                       )
                     }
                     className={clsx(
                       `w-full flex flex-row card lg:card-side  shadow-sm overflow-hidden cursor-pointer transition-all hover:shadow-lg mb-5  text-white `,
                       questions.every((q) => q.statusInspectionConfig)
                         ? `bg-green-800/80 hover:bg-green-800 hover:text-white/80`
-                        : `bg-black/80 hover:bg-[#191917] hover:text-white/80`
+                        : `bg-black/80 hover:bg-[#191917] hover:text-white/80`,
                     )}
                     key={groupName}
                   >
@@ -229,7 +191,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
                         ` w-fit flex items-center justify-center p-2`,
                         questions.every((q) => q.statusInspectionConfig)
                           ? `bg-green-800`
-                          : `bg-[#191917]`
+                          : `bg-[#191917]`,
                       )}
                     >
                       {questions.every((q) => q.statusInspectionConfig) ? (
@@ -278,7 +240,7 @@ const GenerateStep1: FC<GenerateStep1Props> = ({ ClientName }) => {
 
       <div className="text-center mt-5">
         <button
-          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px]"
+          className="btn font-normal bg-black text-white rounded-full pr-3 py-6 sm:flex border-none flex-1 w-full md:w-[300px] mx-auto text-[13px] disabled:!bg-black/50"
           disabled={
             !fullInspection?.questions.every((q) => q.statusInspectionConfig)
           }

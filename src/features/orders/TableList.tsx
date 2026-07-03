@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getWorkOrders } from "./api/workOrdersApi";
+import { getWorkOrdersUseCase } from "@/core/di/container";
+import { QB_REALM_ID } from "@/core/config/constants";
+import { getErrorMessage } from "@/core/utils/errorMessage";
 import { WorkOrder, WorkOrderStatus } from "./models/workOrder.types";
 import { FiTrash2, FiPrinter } from "react-icons/fi";
 import { FaRegEdit, FaRegEye } from "react-icons/fa";
-import { TableListProps } from "@/shared/types/order/ITypes";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
+import { TableListProps } from "@/core/types/order/ITypes";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
+import { axiosInstance } from "@/core/utils/axiosInstance";
 import { IoMdCheckmark, IoMdSync } from "react-icons/io";
 import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
-import Loading from "@/shared/components/shared/Loading";
-import { getWorkOrderStatusLabel } from "@/shared/utils/utils";
+import Loading from "@/presentation/components/shared/Loading";
+import { getWorkOrderStatusLabel } from "@/core/utils/utils";
 import { useTranslations } from "next-intl";
-
-const REALM_ID = "9341454759827689";
 
 const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const tToasts = useTranslations("toast");
@@ -38,51 +38,23 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   const [loading, setLoading] = useState(true);
 
   // ==========================
-  // 🔹 HELPERS
-  // ==========================
-  const getAxiosAuthHeader = () => {
-    const h =
-      (axiosInstance.defaults.headers as any)?.common?.Authorization ||
-      (axiosInstance.defaults.headers as any)?.Authorization ||
-      "";
-    return typeof h === "string" ? h : "";
-  };
-
-  const getErrorMessage = (err: any) => {
-    return (
-      err?.response?.data?.detail ||
-      err?.response?.data?.message ||
-      err?.response?.data ||
-      err?.message ||
-      String(err)
-    );
-  };
-
-  // ==========================
   // 🔹 SYNCHRONIZATION LOGIC
   // ==========================
   const handleSyncWorkOrder = async (
     workOrderId: number,
-    syncOnlyEstimate = false
+    syncOnlyEstimate = false,
   ) => {
     setSyncStatus((prev) => ({ ...prev, [workOrderId]: "loading" }));
-
     try {
-      // 1) Crear estimate en backend
       const response = await axiosInstance.put(
         "/QuickBooks/CreateEstimateFromWorkOrder",
-        { workOrderId }
+        { workOrderId },
       );
 
       const quickBookEstimatedId = response.data;
 
-      if (!quickBookEstimatedId) {
-        throw new Error("QuickBooks no devolvió un EstimateId válido.");
-      }
-
-      // 2) Adjuntar PDF (server-side via Next route)
       if (!syncOnlyEstimate) {
-        await sendPdfToQuickBooks(Number(quickBookEstimatedId), workOrderId);
+        await sendPdfToQuickBooks(quickBookEstimatedId, workOrderId);
       }
 
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "success" }));
@@ -97,41 +69,44 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         await fetchData(currentPage);
         toast.success(`${tToasts("ok")}: ${tToasts("msj.14")}`);
       }, 1200);
-    } catch (err: any) {
-      console.error("Sync error:", err);
-      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
+    } catch (error) {
+      toast.error(`${tToasts("error")}: ${error}`);
       setSyncStatus((prev) => ({ ...prev, [workOrderId]: "idle" }));
     }
   };
 
   const sendPdfToQuickBooks = async (
     quickBookEstimatedId: number,
-    workOrderId: number
+    workOrderId: number,
   ) => {
-    // Este método YA NO envía multipart al backend directamente.
-    // Lo hace por /api/quickbooks/attach-estimate-pdf (server-side).
-    const auth = getAxiosAuthHeader();
+    try {
+      const response = await fetch(`/api/pdf/${workOrderId}`);
+      if (!response.ok) throw new Error("Error al generar el PDF");
 
-    const res = await fetch("/api/quickbooks/attach-estimate-pdf", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(auth ? { Authorization: auth } : {}),
-      },
-      body: JSON.stringify({
-        quickBookEstimateId: String(quickBookEstimatedId),
-        workOrderId,
-        type: "workorder",
-        realmId: REALM_ID,
-      }),
-    });
+      const pdfBlob = await response.blob();
+      const file = new File(
+        [pdfBlob],
+        `WorkOrder-${quickBookEstimatedId}.pdf`,
+        {
+          type: "application/pdf",
+        },
+      );
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Adjuntar PDF falló (${res.status}): ${text}`);
+      const formData = new FormData();
+      formData.append("QuickBookEstimateId", String(quickBookEstimatedId));
+      formData.append("FilePdf", file);
+      formData.append("RealmId", QB_REALM_ID);
+
+      await axiosInstance.post(
+        `/QuickBooks/estimates/attachmentPDF?RealmId=${QB_REALM_ID}`,
+        formData,
+      );
+
+      toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
     }
-
-    toast.success(`${tToasts("ok")}: ${tToasts("msj.15")}`);
   };
 
   // ==========================
@@ -145,12 +120,16 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         workorder: objFilter.workorder ? String(objFilter.workorder) : "",
       };
 
-      const response = await getWorkOrders(filterSend, page, rowsPerPage);
+      const response = await getWorkOrdersUseCase.execute(
+        filterSend,
+        page,
+        rowsPerPage,
+      );
 
       setAllData(response.items ?? []);
       setTotalRecords(response.totalCount ?? 0);
-    } catch (err: any) {
-      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
+    } catch (error: unknown) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(error)}`);
     } finally {
       setLoading(false);
     }
@@ -161,20 +140,16 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
   // ==========================
   const updateWorkOrderState = async (
     workOrderId: number,
-    statusWorkOrder: number = WorkOrderStatus.Disabled
+    statusWorkOrder: number = WorkOrderStatus.Disabled,
   ) => {
     try {
-      await axiosInstance.put(
-        `/WorkOrder/UpdateWorkOrderState/${workOrderId}`,
-        {
-          workOrderId,
-          statusWorkOrder,
-        }
-      );
-
-      fetchData(currentPage);
-    } catch (err: any) {
-      toast.error(`${tToasts("error")}: ${getErrorMessage(err)}`);
+      await axiosInstance.put(`/WorkOrder/UpdateWorkOrderState/${workOrderId}`, {
+        workOrderId,
+        statusWorkOrder,
+      });
+      await fetchData(currentPage);
+    } catch (error: unknown) {
+      toast.error(`${tToasts("error")}: ${getErrorMessage(error)}`);
     }
   };
 
@@ -322,7 +297,7 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
                       label={tGeneral("btnPrint")}
                       onClick={() =>
                         router.push(
-                          `${pathname}/generate-pdf/${item.workOrderId}`
+                          `${pathname}/generate-pdf/${item.workOrderId}`,
                         )
                       }
                     />
@@ -365,7 +340,9 @@ const TableList = ({ objFilter, refreshSignal }: TableListProps) => {
         {[...Array(totalPages)].map((_, idx) => (
           <button
             key={idx}
-            className={`join-item btn ${currentPage === idx + 1 ? "btn-active" : ""}`}
+            className={`join-item btn ${
+              currentPage === idx + 1 ? "btn-active" : ""
+            }`}
             onClick={() => changePage(idx + 1)}
           >
             {idx + 1}

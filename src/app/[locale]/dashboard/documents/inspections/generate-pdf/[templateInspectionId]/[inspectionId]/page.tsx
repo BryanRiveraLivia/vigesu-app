@@ -2,33 +2,38 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams, usePathname } from "next/navigation";
-import { axiosInstance } from "@/shared/utils/axiosInstance";
-import { LiftgateInspection } from "@/shared/types/order/ITypes";
-import Loading from "@/shared/components/shared/Loading";
+import { axiosInstance } from "@/core/utils/axiosInstance";
+import { LiftgateInspection } from "@/core/types/order/ITypes";
+import Loading from "@/presentation/components/shared/Loading";
 import LiftgateInspectionCheckList, {
   IInspection,
   IInspectionDetail,
-} from "@/shared/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
-import BackButton from "@/shared/components/shared/BackButton";
-import ActionButton from "@/shared/components/shared/tableButtons/ActionButton";
+} from "@/presentation/components/shared/InspectionsPdf/LiftgateInspectionCheckList";
+import BackButton from "@/presentation/components/shared/BackButton";
+import ActionButton from "@/presentation/components/shared/tableButtons/ActionButton";
 import { FiEdit, FiPrinter } from "react-icons/fi";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { IoCloseOutline } from "react-icons/io5";
 import { useReactToPrint } from "react-to-print";
-import { generatePDF } from "@/shared/utils/generatePDF";
-import RenderComponentByNumber from "@/shared/components/shared/InspectionsPdf/RenderComponentByNumber";
+import { generatePDF } from "@/core/utils/generatePDF";
+import RenderComponentByNumber from "@/presentation/components/shared/InspectionsPdf/RenderComponentByNumber";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { formatApiErrorForToast } from "@/shared/utils/errors";
+import {
+  CARGAR_DEMO,
+  DEMO_TEMPLATES,
+  getDemoTemplateData,
+  getDemoInspectionDetails,
+} from "@/features/orders/inspections/utils/demoData";
 
 const GeneratePdfPage = () => {
   const tToasts = useTranslations("toast");
   const [isEditable, setIsEditable] = useState<boolean>(false);
   const [templateData, setTemplateData] = useState<LiftgateInspection | null>(
-    null
+    null,
   );
   const [inspectionData, setInspectionData] = useState<IInspection | null>(
-    null
+    null,
   );
 
   const params = useParams();
@@ -45,40 +50,86 @@ const GeneratePdfPage = () => {
     documentTitle: `Inspection - ${templateData?.name ?? "Inspection"}`,
 
     pageStyle: `
-    @page { size: auto; margin: 12mm; }
+    @page { size: auto; margin: 5mm; }
     @media print {
-      html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        width: 794px !important;
+        min-width: 794px !important;
+      }
+      #pdf-content {
+        width: 794px !important;
+        min-width: 794px !important;
+        max-width: 794px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
     }
   `,
   });
 
   useEffect(() => {
     const fetchData = async () => {
+      const numInspId = Number(inspectionId);
+      const numTempId = Number(templateInspectionId);
+
+      if (CARGAR_DEMO && numInspId < 0) {
+        setTemplateData(getDemoTemplateData(numTempId));
+        setInspectionData({
+          inspectionId: numInspId,
+          inspectionNumber: `DEMO-${String(numTempId).padStart(3, "0")}`,
+          typeInspectionId: 1,
+          templateInspectionId: numTempId,
+          customerId: "1",
+          employeeId: "1",
+          customerName: `Demo Client (${DEMO_TEMPLATES[numTempId] || "Template"})`,
+          employeeName: "Demo Inspector AI",
+          dateOfInspection: new Date().toISOString(),
+          inspectionDetails: getDemoInspectionDetails(numTempId),
+          inspectionPhotos: [],
+        });
+        return;
+      }
+
       try {
         const [resTemplate, resInspection] = await Promise.allSettled([
           axiosInstance.get(
-            `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`
+            `/TemplateInspection/GetTemplateInspectionById?TemplateInspectionId=${templateInspectionId}`,
           ),
           axiosInstance.get(
-            `/Inspection/GetInspectionById?InspectionId=${inspectionId}`
+            `/Inspection/GetInspectionById?InspectionId=${inspectionId}`,
           ),
         ]);
 
         if (resTemplate.status === "fulfilled") {
           setTemplateData(resTemplate.value.data);
+        } else if (CARGAR_DEMO) {
+          setTemplateData(getDemoTemplateData(numTempId));
         } else {
           toast.error(`${tToasts("error")}: ${tToasts("msj.3")}`);
         }
 
         if (resInspection.status === "fulfilled") {
           setInspectionData(resInspection.value.data);
+        } else if (CARGAR_DEMO) {
+          setInspectionData({
+            inspectionId: numInspId,
+            inspectionNumber: `DEMO-${String(numTempId).padStart(3, "0")}`,
+            typeInspectionId: 1,
+            templateInspectionId: numTempId,
+            customerId: "1",
+            employeeId: "1",
+            customerName: `Demo Client (${DEMO_TEMPLATES[numTempId] || "Template"})`,
+            employeeName: "Demo Inspector AI",
+            dateOfInspection: new Date().toISOString(),
+            inspectionDetails: getDemoInspectionDetails(numTempId),
+            inspectionPhotos: [],
+          });
         }
       } catch (error) {
-        //toast.error(`${tToasts("error")}: ${error}`);
-        const msg = formatApiErrorForToast(error);
-        toast.error(msg, {
-          style: { whiteSpace: "pre-line" },
-        });
+        toast.error(`${tToasts("error")}: ${error}`);
       }
     };
 
@@ -117,7 +168,7 @@ const GeneratePdfPage = () => {
             onClick={() =>
               generatePDF(
                 "pdf-content",
-                `Inspection - ${templateData.name}.pdf`
+                `Inspection - ${templateData.name}.pdf`,
               )
             }
           />
